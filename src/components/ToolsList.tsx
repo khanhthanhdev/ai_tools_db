@@ -3,7 +3,9 @@ import { api } from "../../convex/_generated/api";
 import { ToolCard } from "./ToolCard";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Loader2 } from "lucide-react";
+import { Button } from "./ui/button";
+import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface ToolsListProps {
   searchTerm: string;
@@ -18,6 +20,14 @@ export function ToolsList({
   selectedPricing,
   language,
 }: ToolsListProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE_MOBILE = 6;
+  const ITEMS_PER_PAGE_DESKTOP = 12;
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, selectedPricing]);
   const searchResults = useQuery(
     api.aiTools.searchTools,
     searchTerm
@@ -42,6 +52,26 @@ export function ToolsList({
   );
 
   const tools = searchTerm ? searchResults : browseResults;
+
+  // Use hook for responsive detection
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  // Pagination logic
+  const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
+  const totalPages = tools ? Math.ceil(tools.length / itemsPerPage) : 0;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTools = tools?.slice(startIndex, endIndex);
 
   if (tools === undefined) {
     return (
@@ -77,7 +107,95 @@ export function ToolsList({
     );
   }
 
-  // Group tools by category for better organization
+  // Pagination controls component
+  const PaginationControls = () => {
+    if (totalPages <= 1) return null;
+    
+    return (
+      <div className="flex items-center justify-center gap-2 mt-8">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          {language === "en" ? "Previous" : "Trước"}
+        </Button>
+        
+        <div className="flex items-center gap-1">
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNumber;
+            if (totalPages <= 5) {
+              pageNumber = i + 1;
+            } else if (currentPage <= 3) {
+              pageNumber = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNumber = totalPages - 4 + i;
+            } else {
+              pageNumber = currentPage - 2 + i;
+            }
+            
+            return (
+              <Button
+                key={pageNumber}
+                variant={currentPage === pageNumber ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCurrentPage(pageNumber)}
+                className="w-8 h-8 p-0"
+              >
+                {pageNumber}
+              </Button>
+            );
+          })}
+        </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          {language === "en" ? "Next" : "Tiếp"}
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  };
+
+  // Use pagination for mobile, categories for desktop
+  if (isMobile || selectedCategory) {
+    return (
+      <div className="space-y-6">
+        {selectedCategory && (
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-2xl font-bold text-foreground">{selectedCategory}</h2>
+            <Badge variant="default" className="text-xs">
+              {tools.length}
+            </Badge>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {(paginatedTools || []).map((tool) => (
+            <ToolCard 
+              key={tool._id} 
+              tool={tool} 
+              language={language} 
+              config={{ 
+                size: 'compact', 
+                layout: 'vertical' 
+              }} 
+            />
+          ))}
+        </div>
+        
+        <PaginationControls />
+      </div>
+    );
+  }
+
+  // Desktop view with categories (no pagination)
   const toolsByCategory = tools.reduce((acc, tool) => {
     if (!acc[tool.category]) {
       acc[tool.category] = [];
@@ -89,19 +207,17 @@ export function ToolsList({
   const categories = Object.keys(toolsByCategory).sort();
 
   return (
-    <div className="space-y-16">
-      {selectedCategory ? (
-        // Show single category
-        <div>
-          <div className="flex items-center gap-4 mb-10">
-            <div className="w-2 h-10 bg-gradient-to-b from-primary to-primary/80 rounded-full"></div>
-            <h2 className="text-3xl font-bold text-foreground">{selectedCategory}</h2>
-            <Badge variant="secondary">
-              {tools.length} {language === "en" ? "tools" : "công cụ"}
+    <div className="space-y-12">
+      {categories.map((category) => (
+        <div key={category}>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-2xl font-bold text-foreground">{category}</h2>
+            <Badge variant="default" className="text-xs">
+              {toolsByCategory[category].length}
             </Badge>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {tools.map((tool) => (
+            {toolsByCategory[category].map((tool) => (
               <ToolCard 
                 key={tool._id} 
                 tool={tool} 
@@ -114,33 +230,7 @@ export function ToolsList({
             ))}
           </div>
         </div>
-      ) : (
-        // Show all categories
-        categories.map((category) => (
-          <div key={category}>
-            <div className="flex items-center gap-4 mb-10">
-              <div className="w-2 h-10 bg-gradient-to-b from-primary to-primary/80 rounded-full"></div>
-              <h2 className="text-3xl font-bold text-foreground">{category}</h2>
-              <Badge variant="secondary">
-                {toolsByCategory[category].length} {language === "en" ? "tools" : "công cụ"}
-              </Badge>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {toolsByCategory[category].map((tool) => (
-                <ToolCard 
-                  key={tool._id} 
-                  tool={tool} 
-                  language={language} 
-                  config={{ 
-                    size: 'compact', 
-                    layout: 'vertical' 
-                  }} 
-                />
-              ))}
-            </div>
-          </div>
-        ))
-      )}
+      ))}
     </div>
   );
 }

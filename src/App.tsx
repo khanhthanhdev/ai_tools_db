@@ -67,6 +67,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedPricing, setSelectedPricing] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const t = translations[language];
 
@@ -84,10 +85,10 @@ export default function App() {
     switch (activeTab) {
       case "add":
         return (
-          <Card className="max-w-4xl mx-auto">
+          <Card className="max-w-4xl mx-auto mx-4 sm:mx-auto">
             <CardHeader>
-              <CardTitle className="text-2xl">{t.addTool}</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-gray-800">{t.addTool}</CardTitle>
+              <CardDescription className="text-gray-600">
                 {language === "en" 
                   ? "Share an amazing AI tool with the community" 
                   : "Chia sẻ một công cụ AI tuyệt vời với cộng đồng"}
@@ -100,10 +101,10 @@ export default function App() {
         );
       case "manage":
         return (
-          <Card className="max-w-7xl mx-auto">
+          <Card className="max-w-7xl mx-auto mx-4 sm:mx-auto">
             <CardHeader>
-              <CardTitle className="text-2xl">{t.myTools}</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-gray-800">{t.myTools}</CardTitle>
+              <CardDescription className="text-gray-600">
                 {language === "en" 
                   ? "Manage your submitted AI tools" 
                   : "Quản lý các công cụ AI bạn đã gửi"}
@@ -116,10 +117,10 @@ export default function App() {
         );
       case "stats":
         return (
-          <Card className="max-w-7xl mx-auto">
+          <Card className="max-w-7xl mx-auto mx-4 sm:mx-auto">
             <CardHeader>
-              <CardTitle className="text-2xl">{t.stats}</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-gray-800">{t.stats}</CardTitle>
+              <CardDescription className="text-gray-600">
                 {language === "en" 
                   ? "Database statistics and insights" 
                   : "Thống kê và thông tin chi tiết cơ sở dữ liệu"}
@@ -133,29 +134,27 @@ export default function App() {
       default:
         return (
           <>
-            <div className="text-center mb-16">
-              <div className="max-w-6xl mx-auto">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-8 leading-tight">
-                  {t.title}
-                </h1>
-                <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground mb-12 leading-relaxed max-w-4xl mx-auto">
-                  {t.subtitle}
-                </p>
+            <div className="text-center mb-12">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+                {t.title}
+              </h1>
+              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                {t.subtitle}
+              </p>
                 
-                <Unauthenticated>
-                  <Card className="mb-16 max-w-lg mx-auto">
-                    <CardHeader>
-                      <CardTitle className="text-xl">{t.signInPrompt}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <SignInForm />
-                    </CardContent>
-                  </Card>
-                </Unauthenticated>
-              </div>
+              <Unauthenticated>
+                <Card className="mb-12 max-w-md mx-auto mx-4 sm:mx-auto sign-in-form">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg text-gray-800">{t.signInPrompt}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SignInForm />
+                  </CardContent>
+                </Card>
+              </Unauthenticated>
             </div>
 
-            <div className="mb-16">
+            <div className="mb-12">
               <SearchBar
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
@@ -183,64 +182,145 @@ export default function App() {
     <div className="min-h-screen bg-background">
       <Toaster position="top-right" />
       
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="h-20">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 h-full">
+      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 shadow-sm">
+        <div className="h-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 h-full">
             <div className="flex items-center justify-between h-full">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">{t.title}</h1>
-                  <p className="text-sm text-muted-foreground">{t.subtitle}</p>
-                </div>
+                <h1 className="text-lg sm:text-xl font-bold text-gray-800 truncate">{t.title}</h1>
               </div>
 
               <Authenticated>
-                <nav className="hidden lg:flex items-center gap-2 bg-muted/50 backdrop-blur-sm rounded-xl p-2 border">
-                  <Button
+                <nav className="hidden lg:flex items-center gap-1">
+                                    <Button
                     onClick={() => setActiveTab("browse")}
                     variant={activeTab === "browse" ? "default" : "ghost"}
-                    className="px-6 py-3 rounded-lg text-base font-semibold"
+                    size="sm"
+                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
                   >
                     {t.browse}
                   </Button>
                   <Button
                     onClick={() => setActiveTab("add")}
                     variant={activeTab === "add" ? "default" : "ghost"}
-                    className="px-6 py-3 rounded-lg text-base font-semibold"
+                    size="sm"
+                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
                   >
                     {t.addTool}
                   </Button>
                   <Button
                     onClick={() => setActiveTab("manage")}
                     variant={activeTab === "manage" ? "default" : "ghost"}
-                    className="px-6 py-3 rounded-lg text-base font-semibold"
+                    size="sm"
+                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
                   >
                     {t.myTools}
                   </Button>
                   <Button
                     onClick={() => setActiveTab("stats")}
                     variant={activeTab === "stats" ? "default" : "ghost"}
-                    className="px-6 py-3 rounded-lg text-base font-semibold"
+                    size="sm"
+                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
                   >
                     {t.stats}
                   </Button>
                 </nav>
+
+                {/* Mobile Menu Button */}
+                <Button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  variant="ghost"
+                  size="sm"
+                  className="lg:hidden p-2 text-gray-800 hover:text-gray-900"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </Button>
               </Authenticated>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <LanguageToggle language={language} onLanguageChange={setLanguage} />
                 <Authenticated>
                   <SignOutButton />
                 </Authenticated>
+                <Unauthenticated>
+                  <button
+                    onClick={() => {
+                      // Scroll to sign in form
+                      document.querySelector('.sign-in-form')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="px-3 py-2 sm:px-6 sm:py-3 rounded-2xl text-sm sm:text-base bg-blue-600 text-white border-2 border-blue-600 font-semibold hover:bg-blue-700 hover:border-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
+                  >
+                    <span className="hidden sm:inline">Sign in</span>
+                    <span className="sm:hidden">Sign in</span>
+                  </button>
+                </Unauthenticated>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        <Authenticated>
+          {mobileMenuOpen && (
+            <div className="lg:hidden border-t bg-white/95 backdrop-blur">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
+                <div className="flex flex-col gap-1">
+                  <Button
+                    onClick={() => {
+                      setActiveTab("browse");
+                      setMobileMenuOpen(false);
+                    }}
+                    variant={activeTab === "browse" ? "default" : "ghost"}
+                    size="sm"
+                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                  >
+                    {t.browse}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setActiveTab("add");
+                      setMobileMenuOpen(false);
+                    }}
+                    variant={activeTab === "add" ? "default" : "ghost"}
+                    size="sm"
+                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                  >
+                    {t.addTool}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setActiveTab("manage");
+                      setMobileMenuOpen(false);
+                    }}
+                    variant={activeTab === "manage" ? "default" : "ghost"}
+                    size="sm"
+                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                  >
+                    {t.myTools}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setActiveTab("stats");
+                      setMobileMenuOpen(false);
+                    }}
+                    variant={activeTab === "stats" ? "default" : "ghost"}
+                    size="sm"
+                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                  >
+                    {t.stats}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </Authenticated>
       </header>
 
       <div className="flex min-h-[calc(100vh-5rem)]">
@@ -257,42 +337,8 @@ export default function App() {
           />
         )}
 
-        <main className="flex-1 transition-all duration-300">
-          <div className="px-6 lg:px-12 py-12">
-            <Authenticated>
-              <div className="lg:hidden mb-8">
-                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-                  <Button
-                    onClick={() => setActiveTab("browse")}
-                    variant={activeTab === "browse" ? "default" : "outline"}
-                    className="px-6 py-3 rounded-xl text-base font-semibold whitespace-nowrap flex-shrink-0"
-                  >
-                    {t.browse}
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab("add")}
-                    variant={activeTab === "add" ? "default" : "outline"}
-                    className="px-6 py-3 rounded-xl text-base font-semibold whitespace-nowrap flex-shrink-0"
-                  >
-                    {t.addTool}
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab("manage")}
-                    variant={activeTab === "manage" ? "default" : "outline"}
-                    className="px-6 py-3 rounded-xl text-base font-semibold whitespace-nowrap flex-shrink-0"
-                  >
-                    {t.myTools}
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab("stats")}
-                    variant={activeTab === "stats" ? "default" : "outline"}
-                    className="px-6 py-3 rounded-xl text-base font-semibold whitespace-nowrap flex-shrink-0"
-                  >
-                    {t.stats}
-                  </Button>
-                </div>
-              </div>
-            </Authenticated>
+        <main className="flex-1">
+          <div className="px-4 sm:px-6 lg:px-12 py-8">
 
             <Unauthenticated>
               <div className="mb-8 text-center">

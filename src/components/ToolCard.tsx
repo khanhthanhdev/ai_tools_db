@@ -31,9 +31,9 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
   const { size = 'default', layout = 'vertical' } = config;
   
   const pricingVariants = {
-    free: "secondary",
-    freemium: "outline", 
-    paid: "default",
+    free: "success" as const,
+    freemium: "warning" as const, 
+    paid: "secondary" as const,
   } as const;
 
   const pricingIcons = {
@@ -94,7 +94,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
                   <Badge variant={pricingVariants[tool.pricing]}>
                     {pricingIcons[tool.pricing]} {pricingLabels[language][tool.pricing]}
                   </Badge>
-                  <Badge variant="outline">
+                  <Badge variant="secondary">
                     {tool.category}
                   </Badge>
                 </div>
@@ -109,7 +109,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
               <div className="mb-4">
                 <div className="flex flex-wrap gap-1">
                   {tool.tags.slice(0, 3).map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
+                    <Badge key={index} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
@@ -122,7 +122,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
               </div>
             )}
 
-            <Button asChild className="w-fit">
+            <Button asChild variant="secondary" className="w-fit">
               <a href={tool.url} target="_blank" rel="noopener noreferrer">
                 {language === "en" ? "Try Now" : "Thử ngay"}
                 <ExternalLink className="ml-2 h-4 w-4" />
@@ -163,7 +163,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
           <CardTitle className={`${currentSize.titleSize} mb-2 line-clamp-2`}>
             {tool.name}
           </CardTitle>
-          <Badge variant="outline">
+          <Badge variant="secondary">
             {tool.category}
           </Badge>
         </div>
@@ -176,7 +176,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
           <div className="mb-6">
             <div className="flex flex-wrap gap-1">
               {tool.tags.slice(0, 2).map((tag, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
+                <Badge key={index} variant="outline" className="text-xs">
                   {tag}
                 </Badge>
               ))}
@@ -190,7 +190,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
         )}
 
         <div className="mt-auto">
-          <Button asChild className="w-full">
+          <Button asChild variant="secondary" className="w-full">
             <a href={tool.url} target="_blank" rel="noopener noreferrer">
               {language === "en" ? "Try Now" : "Thử ngay"}
               <ExternalLink className="ml-2 h-4 w-4" />
