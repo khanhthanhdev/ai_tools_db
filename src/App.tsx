@@ -13,6 +13,8 @@ import { UserToolsManager } from "./components/UserToolsManager";
 import { DatabaseStats } from "./components/DatabaseStats";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
+import { SlidersHorizontal } from "lucide-react";
 
 type Language = "en" | "vi";
 type ActiveTab = "browse" | "add" | "manage" | "stats";
@@ -85,10 +87,10 @@ export default function App() {
     switch (activeTab) {
       case "add":
         return (
-          <Card className="max-w-4xl mx-auto mx-4 sm:mx-auto">
-            <CardHeader>
-              <CardTitle className="text-2xl text-gray-800">{t.addTool}</CardTitle>
-              <CardDescription className="text-gray-600">
+          <Card className="mx-auto max-w-4xl shadow-sm">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl">{t.addTool}</CardTitle>
+              <CardDescription>
                 {language === "en" 
                   ? "Share an amazing AI tool with the community" 
                   : "Chia sẻ một công cụ AI tuyệt vời với cộng đồng"}
@@ -101,10 +103,10 @@ export default function App() {
         );
       case "manage":
         return (
-          <Card className="max-w-7xl mx-auto mx-4 sm:mx-auto">
-            <CardHeader>
-              <CardTitle className="text-2xl text-gray-800">{t.myTools}</CardTitle>
-              <CardDescription className="text-gray-600">
+          <Card className="mx-auto max-w-7xl shadow-sm">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl">{t.myTools}</CardTitle>
+              <CardDescription>
                 {language === "en" 
                   ? "Manage your submitted AI tools" 
                   : "Quản lý các công cụ AI bạn đã gửi"}
@@ -117,10 +119,10 @@ export default function App() {
         );
       case "stats":
         return (
-          <Card className="max-w-7xl mx-auto mx-4 sm:mx-auto">
-            <CardHeader>
-              <CardTitle className="text-2xl text-gray-800">{t.stats}</CardTitle>
-              <CardDescription className="text-gray-600">
+          <Card className="mx-auto max-w-7xl shadow-sm">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl">{t.stats}</CardTitle>
+              <CardDescription>
                 {language === "en" 
                   ? "Database statistics and insights" 
                   : "Thống kê và thông tin chi tiết cơ sở dữ liệu"}
@@ -134,18 +136,18 @@ export default function App() {
       default:
         return (
           <>
-            <div className="text-center mb-12">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
+            <div className="mb-12 text-center">
+              <h1 className="mb-3 text-4xl font-bold tracking-tight md:text-5xl">
                 {t.title}
               </h1>
-              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+              <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
                 {t.subtitle}
               </p>
                 
               <Unauthenticated>
-                <Card className="mb-12 max-w-md mx-auto mx-4 sm:mx-auto sign-in-form">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg text-gray-800">{t.signInPrompt}</CardTitle>
+                <Card className="sign-in-form mx-auto mb-12 max-w-md shadow-sm">
+                  <CardHeader className="space-y-1 pb-4">
+                    <CardTitle className="text-lg">{t.signInPrompt}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <SignInForm />
@@ -167,6 +169,42 @@ export default function App() {
               />
             </div>
 
+            <div className="mb-10 flex items-center justify-center lg:hidden">
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex w-full max-w-xs items-center justify-center gap-2 rounded-full px-4 py-2"
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                    {language === "en" ? "Filters" : "Bộ lọc"}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-full sm:max-w-sm">
+                  <SheetHeader className="text-left">
+                    <SheetTitle>
+                      {language === "en" ? "Refine results" : "Lọc kết quả"}
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 max-h-[70vh] overflow-y-auto pb-8">
+                    <Sidebar
+                      isOpen={sidebarOpen}
+                      onClose={() => setSidebarOpen(false)}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={setSelectedCategory}
+                      selectedPricing={selectedPricing}
+                      onPricingChange={setSelectedPricing}
+                      language={language}
+                      translations={t}
+                      variant="mobile"
+                      className="space-y-8"
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+
             <ToolsList
               searchTerm={searchTerm}
               selectedCategory={selectedCategory}
@@ -179,98 +217,88 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Toaster position="top-right" />
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <Toaster position="top-right" richColors />
       
-      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/90 shadow-sm">
-        <div className="h-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 h-full">
-            <div className="flex items-center justify-between h-full">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h1 className="text-lg sm:text-xl font-bold text-gray-800 truncate">{t.title}</h1>
-              </div>
-
-              <Authenticated>
-                <nav className="hidden lg:flex items-center gap-1">
-                                    <Button
-                    onClick={() => setActiveTab("browse")}
-                    variant={activeTab === "browse" ? "default" : "ghost"}
-                    size="sm"
-                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
-                  >
-                    {t.browse}
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab("add")}
-                    variant={activeTab === "add" ? "default" : "ghost"}
-                    size="sm"
-                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
-                  >
-                    {t.addTool}
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab("manage")}
-                    variant={activeTab === "manage" ? "default" : "ghost"}
-                    size="sm"
-                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
-                  >
-                    {t.myTools}
-                  </Button>
-                  <Button
-                    onClick={() => setActiveTab("stats")}
-                    variant={activeTab === "stats" ? "default" : "ghost"}
-                    size="sm"
-                    className="text-sm font-medium text-gray-800 hover:text-gray-900"
-                  >
-                    {t.stats}
-                  </Button>
-                </nav>
-
-                {/* Mobile Menu Button */}
-                <Button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden p-2 text-gray-800 hover:text-gray-900"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </Button>
-              </Authenticated>
-              
-              <div className="flex items-center gap-2 sm:gap-4">
-                <LanguageToggle language={language} onLanguageChange={setLanguage} />
-                <Authenticated>
-                  <SignOutButton />
-                </Authenticated>
-                <Unauthenticated>
-                  <button
-                    onClick={() => {
-                      // Scroll to sign in form
-                      document.querySelector('.sign-in-form')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="px-3 py-2 sm:px-6 sm:py-3 rounded-2xl text-sm sm:text-base bg-blue-600 text-white border-2 border-blue-600 font-semibold hover:bg-blue-700 hover:border-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
-                  >
-                    <span className="hidden sm:inline">Sign in</span>
-                    <span className="sm:hidden">Sign in</span>
-                  </button>
-                </Unauthenticated>
-              </div>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
             </div>
+            <h1 className="text-xl font-bold">{t.title}</h1>
+          </div>
+
+          <Authenticated>
+            <nav className="ml-auto hidden items-center gap-2 lg:flex">
+              <Button
+                onClick={() => setActiveTab("browse")}
+                variant={activeTab === "browse" ? "default" : "ghost"}
+                size="sm"
+              >
+                {t.browse}
+              </Button>
+              <Button
+                onClick={() => setActiveTab("add")}
+                variant={activeTab === "add" ? "default" : "ghost"}
+                size="sm"
+              >
+                {t.addTool}
+              </Button>
+              <Button
+                onClick={() => setActiveTab("manage")}
+                variant={activeTab === "manage" ? "default" : "ghost"}
+                size="sm"
+              >
+                {t.myTools}
+              </Button>
+              <Button
+                onClick={() => setActiveTab("stats")}
+                variant={activeTab === "stats" ? "default" : "ghost"}
+                size="sm"
+              >
+                {t.stats}
+              </Button>
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <Button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              variant="ghost"
+              size="icon"
+              className="ml-auto lg:hidden"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </Button>
+          </Authenticated>
+          
+          <div className="ml-auto flex items-center gap-2 lg:ml-4">
+            <LanguageToggle language={language} onLanguageChange={setLanguage} />
+            <Authenticated>
+              <SignOutButton />
+            </Authenticated>
+            <Unauthenticated>
+              <Button
+                onClick={() => {
+                  document.querySelector('.sign-in-form')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="shadow-sm"
+              >
+                Sign in
+              </Button>
+            </Unauthenticated>
           </div>
         </div>
 
         {/* Mobile Menu Dropdown */}
         <Authenticated>
           {mobileMenuOpen && (
-            <div className="lg:hidden border-t bg-white/95 backdrop-blur">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
+            <div className="border-t lg:hidden">
+              <div className="container py-2">
                 <div className="flex flex-col gap-1">
                   <Button
                     onClick={() => {
@@ -279,7 +307,7 @@ export default function App() {
                     }}
                     variant={activeTab === "browse" ? "default" : "ghost"}
                     size="sm"
-                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                    className="justify-start"
                   >
                     {t.browse}
                   </Button>
@@ -290,7 +318,7 @@ export default function App() {
                     }}
                     variant={activeTab === "add" ? "default" : "ghost"}
                     size="sm"
-                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                    className="justify-start"
                   >
                     {t.addTool}
                   </Button>
@@ -301,7 +329,7 @@ export default function App() {
                     }}
                     variant={activeTab === "manage" ? "default" : "ghost"}
                     size="sm"
-                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                    className="justify-start"
                   >
                     {t.myTools}
                   </Button>
@@ -312,7 +340,7 @@ export default function App() {
                     }}
                     variant={activeTab === "stats" ? "default" : "ghost"}
                     size="sm"
-                    className="justify-start text-sm font-medium text-gray-800 hover:text-gray-900"
+                    className="justify-start"
                   >
                     {t.stats}
                   </Button>
@@ -323,7 +351,7 @@ export default function App() {
         </Authenticated>
       </header>
 
-      <div className="flex min-h-[calc(100vh-5rem)]">
+      <div className="flex flex-col lg:flex-row">
         {activeTab === "browse" && (
           <Sidebar
             isOpen={sidebarOpen}
@@ -334,18 +362,19 @@ export default function App() {
             onPricingChange={setSelectedPricing}
             language={language}
             translations={t}
+            variant="desktop"
           />
         )}
 
-        <main className="flex-1">
-          <div className="px-4 sm:px-6 lg:px-12 py-8">
+        <main className="min-h-[calc(100vh-4rem)] flex-1">
+          <div className="container max-w-7xl px-4 py-8 sm:px-6">
 
             <Unauthenticated>
               <div className="mb-8 text-center">
                 <Button
                   onClick={() => void handleLoadSampleData()}
                   variant="outline"
-                  className="px-8 py-3 text-lg"
+                  size="lg"
                 >
                   {t.loadSample}
                 </Button>

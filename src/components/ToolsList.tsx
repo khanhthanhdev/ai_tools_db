@@ -75,10 +75,10 @@ export function ToolsList({
 
   if (tools === undefined) {
     return (
-      <div className="flex justify-center items-center py-20">
+      <div className="flex items-center justify-center py-20">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground font-medium">Loading amazing AI tools...</p>
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
+          <p className="font-medium text-muted-foreground">Loading amazing AI tools...</p>
         </div>
       </div>
     );
@@ -86,14 +86,14 @@ export function ToolsList({
 
   if (tools.length === 0) {
     return (
-      <Card className="text-center py-20 max-w-md mx-auto">
+      <Card className="mx-auto max-w-md py-20 text-center shadow-sm">
         <CardContent className="pt-6">
-          <div className="w-24 h-24 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/20">
+            <svg className="h-12 w-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.562M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <CardTitle className="text-xl mb-3">
+          <CardTitle className="mb-3 text-xl">
             {language === "en" ? "No AI tools found" : "Không tìm thấy công cụ AI nào"}
           </CardTitle>
           <CardDescription className="leading-relaxed">
@@ -112,12 +112,13 @@ export function ToolsList({
     if (totalPages <= 1) return null;
     
     return (
-      <div className="flex items-center justify-center gap-2 mt-8">
+      <div className="mt-8 flex items-center justify-center gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
+          className="shadow-sm"
         >
           <ChevronLeft className="h-4 w-4" />
           {language === "en" ? "Previous" : "Trước"}
@@ -142,7 +143,7 @@ export function ToolsList({
                 variant={currentPage === pageNumber ? "default" : "outline"}
                 size="sm"
                 onClick={() => setCurrentPage(pageNumber)}
-                className="w-8 h-8 p-0"
+                className="h-8 w-8 p-0 shadow-sm"
               >
                 {pageNumber}
               </Button>
@@ -155,6 +156,7 @@ export function ToolsList({
           size="sm"
           onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
+          className="shadow-sm"
         >
           {language === "en" ? "Next" : "Tiếp"}
           <ChevronRight className="h-4 w-4" />
@@ -168,15 +170,15 @@ export function ToolsList({
     return (
       <div className="space-y-6">
         {selectedCategory && (
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-2xl font-bold text-foreground">{selectedCategory}</h2>
-            <Badge variant="default" className="text-xs">
+          <div className="mb-6 flex items-center gap-3">
+            <h2 className="text-2xl font-bold">{selectedCategory}</h2>
+            <Badge variant="default" className="text-xs shadow-sm">
               {tools.length}
             </Badge>
           </div>
         )}
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {(paginatedTools || []).map((tool) => (
             <ToolCard 
               key={tool._id} 
@@ -210,13 +212,13 @@ export function ToolsList({
     <div className="space-y-12">
       {categories.map((category) => (
         <div key={category}>
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-2xl font-bold text-foreground">{category}</h2>
-            <Badge variant="default" className="text-xs">
+          <div className="mb-6 flex items-center gap-3">
+            <h2 className="text-2xl font-bold">{category}</h2>
+            <Badge variant="default" className="text-xs shadow-sm">
               {toolsByCategory[category].length}
             </Badge>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {toolsByCategory[category].map((tool) => (
               <ToolCard 
                 key={tool._id} 
