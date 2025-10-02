@@ -31,8 +31,8 @@ interface ToolCardConfig {
 
 const sizeConfig = {
   compact: {
-    media: "h-14 w-14",
-    title: "text-base",
+    media: "h-12 w-12 sm:h-14 sm:w-14",
+    title: "text-sm sm:text-base",
     description: "line-clamp-2",
     tagLimit: 2,
   },
@@ -118,9 +118,9 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4 }}
-      className="h-full"
+      className="h-full w-full flex"
     >
-      <Card className="group relative flex h-full flex-col overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+      <Card className="group relative flex h-full w-full flex-col overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
         {/* Gradient overlay on hover */}
         <div className={cn(
           "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br pointer-events-none",
@@ -132,9 +132,9 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
           <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
         </div>
 
-        <CardContent className="relative flex h-full flex-col p-6">
+        <CardContent className="relative flex h-full flex-col p-4 sm:p-6">
           {/* Top row: logo + badges */}
-          <div className="flex items-start gap-4 mb-4">
+          <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
             {media}
             <div className="flex flex-col gap-2 min-w-0 flex-1">
               <Badge 
@@ -156,51 +156,51 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
           </div>
           
           {/* Title + Description - Flexible area */}
-          <div className="flex-1 flex flex-col gap-3 mb-4">
+          <div className="flex-1 flex flex-col gap-2 sm:gap-3 mb-3 sm:mb-4">
             <CardTitle className={cn(
               "font-bold leading-tight line-clamp-2 transition-colors duration-300 group-hover:text-primary",
               sizing.title
             )}>
               {tool.name}
             </CardTitle>
-            {description && (
-              <CardDescription className={cn(
-                "text-sm leading-relaxed transition-colors duration-300",
-                sizing.description
-              )}>
-                {description}
-              </CardDescription>
-            )}
+            <CardDescription className={cn(
+              "text-sm leading-relaxed transition-colors duration-300",
+              sizing.description
+            )}>
+              {description || "\u00A0"}
+            </CardDescription>
           </div>
           
           {/* Bottom section: Tags */}
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4 min-h-[28px]">
-              {tags.map((tag, index) => (
-                <motion.div
-                  key={tag}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                >
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 min-h-[32px]">
+            {tags.length > 0 && (
+              <>
+                {tags.map((tag, index) => (
+                  <motion.div
+                    key={tag}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs h-fit transition-all duration-300 hover:bg-primary/10 hover:border-primary/50 hover:scale-105"
+                    >
+                      {tag}
+                    </Badge>
+                  </motion.div>
+                ))}
+                {remainingTags > 0 && (
                   <Badge 
                     variant="outline" 
-                    className="text-xs h-fit transition-all duration-300 hover:bg-primary/10 hover:border-primary/50 hover:scale-105"
+                    className="text-xs text-muted-foreground h-fit transition-all duration-300 hover:bg-muted hover:scale-105"
                   >
-                    {tag}
+                    +{remainingTags}
                   </Badge>
-                </motion.div>
-              ))}
-              {remainingTags > 0 && (
-                <Badge 
-                  variant="outline" 
-                  className="text-xs text-muted-foreground h-fit transition-all duration-300 hover:bg-muted hover:scale-105"
-                >
-                  +{remainingTags}
-                </Badge>
-              )}
-            </div>
-          )}
+                )}
+              </>
+            )}
+          </div>
           
           {/* CTA Button - Always at bottom */}
           <Button 

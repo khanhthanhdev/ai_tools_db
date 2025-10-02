@@ -173,7 +173,7 @@ export function SearchBar({
         <AnimatePresence>
           {showSuggestions && (
             <motion.div
-              className="mt-4 overflow-hidden rounded-xl border bg-card shadow-lg"
+              className="mt-4 overflow-hidden rounded-xl border bg-card shadow-lg hidden sm:block"
               variants={ANIMATION_VARIANTS.container}
               initial="hidden"
               animate="show"

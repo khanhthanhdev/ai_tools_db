@@ -1,5 +1,4 @@
-import { Authenticated, Unauthenticated, useMutation } from "convex/react";
-import { api } from "../convex/_generated/api";
+import { Authenticated, Unauthenticated } from "convex/react";
 import { SignInForm } from "./SignInForm";
 import { SignOutButton } from "./SignOutButton";
 import { Toaster } from "sonner";
@@ -7,14 +6,15 @@ import { useState } from "react";
 import { ToolsList } from "./components/ToolsList";
 import { AddToolForm } from "./components/AddToolForm";
 import { SearchBar } from "./components/SearchBar";
+import { CategoryFilterMobile } from "./components/CategoryFilterMobile";
 import { LanguageToggle } from "./components/LanguageToggle";
 import { Sidebar } from "./components/Sidebar";
 import { UserToolsManager } from "./components/UserToolsManager";
 import { DatabaseStats } from "./components/DatabaseStats";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
-import { SlidersHorizontal, Sparkles, Zap, Star, Rocket, Brain, Code, Palette } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./components/ui/dialog";
+import { Sparkles, Zap, Star, Rocket, Brain, Code, Palette } from "lucide-react";
 import BeamsBackground from "./components/kokonutui/beams-background";
 import { motion } from "motion/react";
 
@@ -70,20 +70,8 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedPricing, setSelectedPricing] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const t = translations[language];
-
-  const loadSampleData = useMutation(api.sampleData.seedSampleData);
-
-  const handleLoadSampleData = async () => {
-    try {
-      void await loadSampleData();
-    } catch (error) {
-      console.error("Error loading sample data:", error);
-    }
-  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -138,9 +126,9 @@ export default function App() {
       default:
         return (
           <>
-            <div className="relative mb-12 text-center overflow-hidden">
+            <div className="relative mb-8 sm:mb-12 text-center overflow-hidden">
               {/* Floating Icons and Shapes */}
-              <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 pointer-events-none hidden sm:block">
                 {/* Sparkles Icon - Top Left */}
                 <motion.div
                   className="absolute left-[5%] top-[10%]"
@@ -332,7 +320,7 @@ export default function App() {
 
               {/* Hero Content */}
               <motion.h1 
-                className="relative mb-3 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500"
+                className="relative mb-2 sm:mb-3 text-3xl sm:text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500"
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ 
@@ -344,7 +332,7 @@ export default function App() {
                 {t.title}
               </motion.h1>
               <motion.p 
-                className="relative mx-auto mb-8 max-w-2xl text-lg text-muted-foreground"
+                className="relative mx-auto mb-6 sm:mb-8 max-w-2xl text-base sm:text-lg text-muted-foreground px-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
@@ -355,31 +343,10 @@ export default function App() {
               >
                 {t.subtitle}
               </motion.p>
-                
-              <Unauthenticated>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    duration: 0.8, 
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: 0.5
-                  }}
-                >
-                  <Card className="sign-in-form mx-auto mb-12 max-w-md shadow-sm">
-                    <CardHeader className="space-y-1 pb-4">
-                      <CardTitle className="text-lg">{t.signInPrompt}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <SignInForm />
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </Unauthenticated>
             </div>
 
             <motion.div 
-              className="mb-12"
+              className="mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -400,41 +367,26 @@ export default function App() {
               />
             </motion.div>
 
-            <div className="mb-10 flex items-center justify-center lg:hidden">
-              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex w-full max-w-xs items-center justify-center gap-2 rounded-full px-4 py-2"
-                  >
-                    <SlidersHorizontal className="h-4 w-4" />
-                    {language === "en" ? "Filters" : "Bộ lọc"}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-full sm:max-w-sm">
-                  <SheetHeader className="text-left">
-                    <SheetTitle>
-                      {language === "en" ? "Refine results" : "Lọc kết quả"}
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6 max-h-[70vh] overflow-y-auto pb-8">
-                    <Sidebar
-                      isOpen={sidebarOpen}
-                      onClose={() => setSidebarOpen(false)}
-                      selectedCategory={selectedCategory}
-                      onCategoryChange={setSelectedCategory}
-                      selectedPricing={selectedPricing}
-                      onPricingChange={setSelectedPricing}
-                      language={language}
-                      translations={t}
-                      variant="mobile"
-                      className="space-y-8"
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+            {/* Mobile Category Filter - Horizontal scrolling below search */}
+            <motion.div 
+              className="mb-8 lg:hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.8, 
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.7
+              }}
+            >
+              <CategoryFilterMobile
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                selectedPricing={selectedPricing}
+                onPricingChange={setSelectedPricing}
+                language={language}
+                translations={t}
+              />
+            </motion.div>
 
             <ToolsList
               searchTerm={searchTerm}
@@ -457,25 +409,25 @@ export default function App() {
       <Toaster position="top-right" richColors />
       
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="container flex h-12 sm:h-16 items-center px-3 sm:px-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+              <svg className="h-4 w-4 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold">{t.title}</h1>
+            <h1 className="text-base sm:text-xl font-bold truncate">{t.title}</h1>
           </div>
 
-          <Authenticated>
-            <nav className="ml-auto hidden items-center gap-2 lg:flex">
-              <Button
-                onClick={() => setActiveTab("browse")}
-                variant={activeTab === "browse" ? "default" : "ghost"}
-                size="sm"
-              >
-                {t.browse}
-              </Button>
+          <nav className="hidden flex-1 items-center justify-center gap-2 lg:flex">
+            <Button
+              onClick={() => setActiveTab("browse")}
+              variant={activeTab === "browse" ? "default" : "ghost"}
+              size="sm"
+            >
+              {t.browse}
+            </Button>
+            <Authenticated>
               <Button
                 onClick={() => setActiveTab("add")}
                 variant={activeTab === "add" ? "default" : "ghost"}
@@ -497,101 +449,85 @@ export default function App() {
               >
                 {t.stats}
               </Button>
-            </nav>
-
-            {/* Mobile Menu Button */}
-            <Button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              variant="ghost"
-              size="icon"
-              className="ml-auto lg:hidden"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </Button>
-          </Authenticated>
+            </Authenticated>
+          </nav>
           
-          <div className="ml-auto flex items-center gap-2 lg:ml-4">
+          <div className="ml-auto flex items-center gap-1 sm:gap-2 lg:ml-0">
             <LanguageToggle language={language} onLanguageChange={setLanguage} />
             <Authenticated>
               <SignOutButton />
             </Authenticated>
             <Unauthenticated>
-              <Button
-                onClick={() => {
-                  document.querySelector('.sign-in-form')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="shadow-sm"
-              >
-                Sign in
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="shadow-sm text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
+                    Sign in
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{t.signInPrompt}</DialogTitle>
+                    <DialogDescription>
+                      {language === "en" 
+                        ? "Sign in to add and manage AI tools" 
+                        : "Đăng nhập để thêm và quản lý công cụ AI"}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <SignInForm />
+                </DialogContent>
+              </Dialog>
             </Unauthenticated>
           </div>
         </div>
-
-        {/* Mobile Menu Dropdown */}
-        <Authenticated>
-          {mobileMenuOpen && (
-            <div className="border-t lg:hidden">
-              <div className="container py-2">
-                <div className="flex flex-col gap-1">
-                  <Button
-                    onClick={() => {
-                      setActiveTab("browse");
-                      setMobileMenuOpen(false);
-                    }}
-                    variant={activeTab === "browse" ? "default" : "ghost"}
-                    size="sm"
-                    className="justify-start"
-                  >
-                    {t.browse}
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setActiveTab("add");
-                      setMobileMenuOpen(false);
-                    }}
-                    variant={activeTab === "add" ? "default" : "ghost"}
-                    size="sm"
-                    className="justify-start"
-                  >
-                    {t.addTool}
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setActiveTab("manage");
-                      setMobileMenuOpen(false);
-                    }}
-                    variant={activeTab === "manage" ? "default" : "ghost"}
-                    size="sm"
-                    className="justify-start"
-                  >
-                    {t.myTools}
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setActiveTab("stats");
-                      setMobileMenuOpen(false);
-                    }}
-                    variant={activeTab === "stats" ? "default" : "ghost"}
-                    size="sm"
-                    className="justify-start"
-                  >
-                    {t.stats}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </Authenticated>
       </header>
+
+      {/* Mobile Tab Navigation - Only visible on small screens and when authenticated */}
+      <Authenticated>
+        <div className="sticky top-12 sm:top-16 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
+          <div className="container px-3 sm:px-6">
+            <nav className="flex gap-1 justify-center overflow-x-auto py-2 scrollbar-hide">
+              <Button
+                onClick={() => setActiveTab("browse")}
+                variant={activeTab === "browse" ? "default" : "ghost"}
+                size="sm"
+                className="whitespace-nowrap flex-shrink-0"
+              >
+                📂 {t.browse}
+              </Button>
+              <Button
+                onClick={() => setActiveTab("add")}
+                variant={activeTab === "add" ? "default" : "ghost"}
+                size="sm"
+                className="whitespace-nowrap flex-shrink-0"
+              >
+                ➕ {t.addTool}
+              </Button>
+              <Button
+                onClick={() => setActiveTab("manage")}
+                variant={activeTab === "manage" ? "default" : "ghost"}
+                size="sm"
+                className="whitespace-nowrap flex-shrink-0"
+              >
+                🛠️ {t.myTools}
+              </Button>
+              <Button
+                onClick={() => setActiveTab("stats")}
+                variant={activeTab === "stats" ? "default" : "ghost"}
+                size="sm"
+                className="whitespace-nowrap flex-shrink-0"
+              >
+                📊 {t.stats}
+              </Button>
+            </nav>
+          </div>
+        </div>
+      </Authenticated>
 
       <div className="flex flex-col lg:flex-row">
         {activeTab === "browse" && (
           <Sidebar
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
+            isOpen={false}
+            onClose={() => {}}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
             selectedPricing={selectedPricing}
@@ -602,21 +538,8 @@ export default function App() {
           />
         )}
 
-        <main className="min-h-[calc(100vh-4rem)] flex-1">
-          <div className="container max-w-7xl px-4 py-8 sm:px-6">
-
-            <Unauthenticated>
-              <div className="mb-8 text-center">
-                <Button
-                  onClick={() => void handleLoadSampleData()}
-                  variant="outline"
-                  size="lg"
-                >
-                  {t.loadSample}
-                </Button>
-              </div>
-            </Unauthenticated>
-
+        <main className="min-h-[calc(100vh-8rem)] flex-1">
+          <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
             {renderTabContent()}
           </div>
         </main>

@@ -188,7 +188,6 @@ export function ToolsList({
         
         <motion.div 
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          style={{ gridAutoRows: '1fr' }}
           initial="hidden"
           animate="visible"
           variants={{
@@ -204,7 +203,7 @@ export function ToolsList({
           {(paginatedTools || []).map((tool) => (
             <motion.div
               key={tool._id}
-              className="flex"
+              className="flex h-full min-h-0"
               variants={{
                 hidden: { opacity: 0, y: 20 },
                 visible: { 
@@ -267,8 +266,7 @@ export function ToolsList({
             </Badge>
           </div>
           <motion.div 
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            style={{ gridAutoRows: '1fr' }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr"
             initial="hidden"
             animate="visible"
             variants={{
@@ -284,7 +282,7 @@ export function ToolsList({
             {toolsByCategory[category].map((tool) => (
               <motion.div
                 key={tool._id}
-                className="flex"
+                className="flex h-full min-h-0"
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: { 
