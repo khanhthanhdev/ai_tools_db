@@ -19,6 +19,7 @@ const applicationTables = {
     totalReviews: v.optional(v.number()),
     totalFavourites: v.optional(v.number()),
     ratingSum: v.optional(v.number()),
+    embedding: v.optional(v.array(v.number())),
   })
     .index("by_category", ["category"])
     .index("by_pricing", ["pricing"])
@@ -29,6 +30,11 @@ const applicationTables = {
     .index("by_normalizedName", ["normalizedName"])
     .index("by_language_and_isApproved", ["language", "isApproved"])
     .index("by_pricing_and_isApproved", ["pricing", "isApproved"])
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 1536, // OpenAI text-embedding-ada-002
+      filterFields: ["isApproved", "language", "category", "pricing"],
+    })
     .searchIndex("search_tools", {
       searchField: "name",
       filterFields: ["category", "pricing", "language", "isApproved"],
