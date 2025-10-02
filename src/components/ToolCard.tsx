@@ -5,6 +5,12 @@ import { Button } from "./ui/button";
 import { ExternalLink, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface ToolCardProps {
   tool: Doc<"aiTools">;
@@ -75,6 +81,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
   const description = tool.description;
   const tags = (tool.tags ?? []).slice(0, sizing.tagLimit);
   const remainingTags = Math.max(0, (tool.tags?.length ?? 0) - tags.length);
+  const hiddenTags = (tool.tags ?? []).slice(sizing.tagLimit);
   const ctaLabel = language === "en" ? "Try Now" : "Thử ngay";
 
   // Media component (logo or placeholder)
@@ -174,7 +181,7 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
           {/* Bottom section: Tags */}
           <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 min-h-[32px]">
             {tags.length > 0 && (
-              <>
+              <TooltipProvider delayDuration={200}>
                 {tags.map((tag, index) => (
                   <motion.div
                     key={tag}
@@ -182,23 +189,49 @@ export function ToolCard({ tool, language, config = {} }: ToolCardProps & { conf
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Badge 
-                      variant="outline" 
-                      className="text-xs h-fit transition-all duration-300 hover:bg-primary/10 hover:border-primary/50 hover:scale-105"
-                    >
-                      {tag}
-                    </Badge>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs h-fit transition-all duration-300 hover:bg-primary/10 hover:border-primary/50 hover:scale-105 cursor-default truncate max-w-[150px]"
+                        >
+                          {tag}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent 
+                        side="top"
+                        className="max-w-[250px] break-words"
+                      >
+                        <p>{tag}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </motion.div>
                 ))}
                 {remainingTags > 0 && (
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs text-muted-foreground h-fit transition-all duration-300 hover:bg-muted hover:scale-105"
-                  >
-                    +{remainingTags}
-                  </Badge>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs text-muted-foreground h-fit transition-all duration-300 hover:bg-muted hover:scale-105 cursor-default"
+                      >
+                        +{remainingTags}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="top"
+                      className="max-w-[250px]"
+                    >
+                      <div className="flex flex-col gap-1">
+                        {hiddenTags.map((tag, index) => (
+                          <span key={index} className="text-xs">
+                            • {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
-              </>
+              </TooltipProvider>
             )}
           </div>
           
