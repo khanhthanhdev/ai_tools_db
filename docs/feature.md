@@ -52,10 +52,15 @@ aiTools: defineTable({
   averageRating: v.optional(v.number()), // 0-5
   totalReviews: v.optional(v.number()),
   totalFavourites: v.optional(v.number()),
+  ratingSum: v.optional(v.number()),
 })
   // ... existing indexes
   .index("by_rating", ["averageRating"])
   .index("by_favourites", ["totalFavourites"])
+  .index("by_isApproved", ["isApproved"])
+  .index("by_submittedBy", ["submittedBy"])
+  .index("by_language_and_isApproved", ["language", "isApproved"])
+  .index("by_pricing_and_isApproved", ["pricing", "isApproved"])
 
 // NEW: Favourites table
 favourites: defineTable({
@@ -82,6 +87,7 @@ reviews: defineTable({
   .index("by_user_and_tool", ["userId", "toolId"])
   .index("by_tool_and_created", ["toolId", "createdAt"])
   .index("by_tool_and_rating", ["toolId", "rating"])
+  .index("by_tool_and_helpful", ["toolId", "helpfulCount"])
 
 // NEW: Review votes table
 reviewVotes: defineTable({
@@ -119,7 +125,7 @@ Since Convex handles migrations automatically:
 2. Verify tool exists
 3. Check if already favourited (prevent duplicates)
 4. Insert/delete favourite record
-5. Update `totalFavourites` count on tool
+5. Recompute or atomically patch `totalFavourites` based on authoritative favourite count
 6. Return success/error
 
 ### Step 2.2: Create Favourites Queries
@@ -153,7 +159,7 @@ Since Convex handles migrations automatically:
 2. Validate rating (1-10) and text (50-500 chars if provided)
 3. Check if user already reviewed this tool (one review per user)
 4. Insert review
-5. Recalculate tool's average rating
+5. Increment tool aggregates (`ratingSum`, `totalReviews`, `averageRating`)
 6. Update `totalReviews` count
 7. Return review ID
 
@@ -161,13 +167,13 @@ Since Convex handles migrations automatically:
 1. Verify user owns the review
 2. Update rating and/or text
 3. Update `updatedAt` timestamp
-4. Recalculate tool's average rating
+4. Adjust tool aggregates using the delta between old and new rating
 5. Return success
 
 **Logic for markReviewHelpful:**
 1. Check if user already voted
 2. Insert vote record
-3. Increment `helpfulCount` on review
+3. Increment `helpfulCount` on review (use atomic patch)
 4. Return success
 
 ### Step 3.2: Create Review Queries
@@ -186,21 +192,23 @@ Since Convex handles migrations automatically:
 **File:** `convex/helpers.ts`
 
 ```typescript
-export async function recalculateToolRating(
-  ctx, 
-  toolId: Id<"aiTools">
+export async function updateRatingAggregates(
+  ctx,
+  toolId: Id<"aiTools">,
+  deltaRating: number,
+  deltaCount: number
 ) {
-  // Get all reviews for this tool
-  // Calculate average rating
-  // Count total reviews
-  // Update aiTools document
+  // Use ctx.db.patch with existing aggregate values (ratingSum, totalReviews, averageRating)
+  // ratingSum += deltaRating
+  // totalReviews += deltaCount
+  // averageRating = totalReviews ? ratingSum / totalReviews : undefined
 }
 ```
 
-**Call this function after:**
-- Creating a review
-- Updating a review
-- Deleting a review
+**Call this helper inside mutations with the appropriate delta:**
+- Creating a review ➜ `deltaRating = rating`, `deltaCount = 1`
+- Updating a review ➜ `deltaRating = newRating - oldRating`, `deltaCount = 0`
+- Deleting a review ➜ `deltaRating = -rating`, `deltaCount = -1`
 
 ---
 

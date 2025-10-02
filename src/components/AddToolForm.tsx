@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { Badge } from "./ui/badge";
 import { Alert, AlertDescription } from "./ui/alert";
 import { X, AlertCircle, Loader2, Sparkles, Link2, FileText, Tag, DollarSign, Image as ImageIcon, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import useDebounce from "../hooks/use-debounce";
 
 interface AddToolFormProps {
   language: "en" | "vi";
@@ -43,7 +44,8 @@ const translations = {
     descriptionRequired: "Description is required",
     urlRequired: "Website URL is required",
     categoryRequired: "Category is required",
-    invalidUrl: "Please enter a valid URL",
+    invalidUrl: "Please enter a valid URL (must start with http:// or https://)",
+    urlInUse: "This URL is already registered",
     saving: "Saving to database...",
     saved: "Successfully saved to database!",
   },
@@ -71,7 +73,8 @@ const translations = {
     descriptionRequired: "Mô tả là bắt buộc",
     urlRequired: "URL trang web là bắt buộc",
     categoryRequired: "Danh mục là bắt buộc",
-    invalidUrl: "Vui lòng nhập URL hợp lệ",
+    invalidUrl: "Vui lòng nhập URL hợp lệ (phải bắt đầu bằng http:// hoặc https://)",
+    urlInUse: "URL này đã được đăng ký",
     saving: "Đang lưu vào cơ sở dữ liệu...",
     saved: "Đã lưu thành công vào cơ sở dữ liệu!",
   },
@@ -90,14 +93,90 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  // Debounce name and URL for duplicate checking (wait 400ms after user stops typing)
+  const debouncedName = useDebounce(formData.name.trim(), 400);
+  const debouncedUrl = useDebounce(formData.url.trim(), 400);
+
+  const trimmedName = debouncedName;
+  const trimmedUrl = debouncedUrl;
+
+  const duplicateArgs = useMemo(() => {
+    // Only check if we have at least 2 characters for name or a URL
+    if ((!trimmedName || trimmedName.length < 2) && !trimmedUrl) {
+      return "skip" as const;
+    }
+
+    return {
+      name: trimmedName || "",
+      url: trimmedUrl || "",
+    };
+  }, [trimmedName, trimmedUrl]);
   
   const addTool = useMutation(api.aiTools.addTool);
-  const checkDuplicate = useQuery(
-    api.aiTools.checkDuplicate,
-    formData.name.trim() && formData.url.trim()
-      ? { name: formData.name.trim(), url: formData.url.trim() }
-      : "skip"
-  );
+  const checkDuplicate = useQuery(api.aiTools.checkDuplicate, duplicateArgs);
+  const isCheckingDuplicate = duplicateArgs !== "skip" && checkDuplicate === undefined;
+  
+  // Separate checking states for better UX
+  const isTypingName = formData.name.trim() !== debouncedName;
+  const isTypingUrl = formData.url.trim() !== debouncedUrl;
+  
+  const duplicateInfo = useMemo(() => {
+    if (!checkDuplicate) {
+      return {
+        isDuplicate: false,
+        nameDuplicate: false,
+        urlDuplicate: false,
+        nameMessage: undefined as string | undefined,
+        urlMessage: undefined as string | undefined,
+        existingNameTool: undefined as string | undefined,
+        existingUrlTool: undefined as string | undefined,
+        fallbackReason: undefined as string | undefined,
+      };
+    }
+
+    const reason = checkDuplicate.reason;
+    const reasonLower = reason?.toLowerCase() ?? "";
+
+    const urlDuplicate = Boolean(
+      checkDuplicate.urlDuplicate ?? (reasonLower.includes("url") && !!trimmedUrl)
+    );
+    const nameDuplicate = Boolean(
+      checkDuplicate.nameDuplicate ?? (reasonLower.includes("name") && !!trimmedName)
+    );
+
+    const urlMessage =
+      checkDuplicate.urlDuplicateReason ??
+      (urlDuplicate ? reason : undefined);
+    const nameMessage =
+      checkDuplicate.nameDuplicateReason ??
+      (nameDuplicate ? reason : undefined);
+
+    const existingUrlTool =
+      checkDuplicate.existingUrlTool ??
+      (urlDuplicate ? checkDuplicate.existingTool : undefined);
+    const existingNameTool =
+      checkDuplicate.existingNameTool ??
+      (nameDuplicate ? checkDuplicate.existingTool : undefined);
+
+    return {
+      isDuplicate: Boolean(checkDuplicate.isDuplicate),
+      nameDuplicate,
+      urlDuplicate,
+      nameMessage,
+      urlMessage,
+      existingNameTool,
+      existingUrlTool,
+      fallbackReason: reason,
+    };
+  }, [checkDuplicate, trimmedName, trimmedUrl]);
+
+  const hasNameDuplicate = duplicateInfo.nameDuplicate;
+  const hasUrlDuplicate = duplicateInfo.urlDuplicate;
+  
+  // Show spinner when either typing or checking
+  const isCheckingNameDuplicate = isTypingName || (isCheckingDuplicate && Boolean(trimmedName) && trimmedName.length >= 2);
+  const isCheckingUrlDuplicate = isTypingUrl || (isCheckingDuplicate && Boolean(trimmedUrl));
   
   const t = translations[language];
 
@@ -114,7 +193,11 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
       errors.url = t.urlRequired;
     } else {
       try {
-        new URL(formData.url);
+        const url = new URL(formData.url.trim());
+        // Check if URL uses http or https protocol
+        if (!url.protocol.match(/^https?:$/)) {
+          errors.url = t.invalidUrl;
+        }
       } catch {
         errors.url = t.invalidUrl;
       }
@@ -135,8 +218,30 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
       return;
     }
     
-    if (checkDuplicate?.isDuplicate) {
-      toast.error(`${t.duplicateFound}: ${checkDuplicate.existingTool}`);
+    // Check duplicates on the actual current values (not debounced) before submitting
+    if (duplicateInfo.isDuplicate) {
+      const duplicateMessages = [
+        duplicateInfo.urlDuplicate && duplicateInfo.urlMessage
+          ? `${duplicateInfo.urlMessage}${duplicateInfo.existingUrlTool ? `: "${duplicateInfo.existingUrlTool}"` : ""}`
+          : null,
+        duplicateInfo.nameDuplicate && duplicateInfo.nameMessage
+          ? `${duplicateInfo.nameMessage}${duplicateInfo.existingNameTool ? `: "${duplicateInfo.existingNameTool}"` : ""}`
+          : null,
+      ].filter(Boolean);
+
+      toast.error(t.duplicateFound, {
+        description: duplicateMessages.join(" • ") || duplicateInfo.fallbackReason,
+        duration: 5000,
+      });
+      return;
+    }
+    
+    // Wait for duplicate check to complete if still checking
+    if (isCheckingDuplicate) {
+      toast.info(t.checkingDuplicate, {
+        description: "Please wait while we verify your submission...",
+        duration: 3000,
+      });
       return;
     }
     
@@ -290,10 +395,19 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
                     required
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
-                    className={`transition-all ${validationErrors.name ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
+                    className={`transition-all ${(validationErrors.name || hasNameDuplicate) ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
                     placeholder="e.g., ChatGPT, Midjourney"
                   />
-                  {formData.name && !validationErrors.name && (
+                  {isCheckingNameDuplicate && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    >
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </motion.div>
+                  )}
+                  {formData.name && !validationErrors.name && !hasNameDuplicate && !isCheckingNameDuplicate && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -316,6 +430,20 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
                     </motion.p>
                   )}
                 </AnimatePresence>
+                <AnimatePresence>
+                  {hasNameDuplicate && !validationErrors.name && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-sm text-destructive flex items-center gap-1"
+                    >
+                      <AlertCircle className="w-3 h-3" />
+                      {duplicateInfo.nameMessage ?? t.duplicateFound}
+                      {duplicateInfo.existingNameTool ? `: "${duplicateInfo.existingNameTool}"` : ""}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
             
               <div className="space-y-2">
@@ -330,14 +458,32 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
                     required
                     value={formData.url}
                     onChange={(e) => handleInputChange("url", e.target.value)}
-                    className={`transition-all ${validationErrors.url ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
+                    className={`transition-all ${(validationErrors.url || hasUrlDuplicate) ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
                     placeholder="https://example.com"
                   />
-                  {formData.url && !validationErrors.url && (
+                  {isCheckingUrlDuplicate && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-500"
+                      title="Checking URL..."
+                    >
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </motion.div>
+                  )}
+                  {formData.url && !validationErrors.url && !hasUrlDuplicate && !isCheckingUrlDuplicate && (() => {
+                    try {
+                      const url = new URL(formData.url.trim());
+                      return url.protocol.match(/^https?:$/);
+                    } catch {
+                      return false;
+                    }
+                  })() && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute right-3 top-1/2 -translate-y-1/2"
+                      title="URL is valid and available"
                     >
                       <CheckCircle2 className="w-4 h-4 text-green-500" />
                     </motion.div>
@@ -354,6 +500,27 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
                       <AlertCircle className="w-3 h-3" />
                       {validationErrors.url}
                     </motion.p>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {hasUrlDuplicate && !validationErrors.url && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                    >
+                      <Alert variant="destructive" className="py-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          <strong>{t.urlInUse}</strong>
+                          {duplicateInfo.existingUrlTool && (
+                            <span className="block mt-1">
+                              Already used by: <span className="font-semibold">"{duplicateInfo.existingUrlTool}"</span>
+                            </span>
+                          )}
+                        </AlertDescription>
+                      </Alert>
+                    </motion.div>
                   )}
                 </AnimatePresence>
               </div>
@@ -554,7 +721,7 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
 
           {/* Duplicate Warning */}
           <AnimatePresence>
-            {checkDuplicate?.isDuplicate && (
+            {duplicateInfo.isDuplicate && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -566,7 +733,21 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
                   <AlertDescription>
                     <div className="space-y-1">
                       <p className="font-semibold text-base">{t.duplicateFound}</p>
-                      <p className="text-sm opacity-90">{checkDuplicate.reason}: "{checkDuplicate.existingTool}"</p>
+                      {duplicateInfo.urlDuplicate && (
+                        <p className="text-sm opacity-90">
+                          {duplicateInfo.urlMessage ?? t.duplicateFound}
+                          {duplicateInfo.existingUrlTool ? `: "${duplicateInfo.existingUrlTool}"` : ""}
+                        </p>
+                      )}
+                      {duplicateInfo.nameDuplicate && (
+                        <p className="text-sm opacity-90">
+                          {duplicateInfo.nameMessage ?? t.duplicateFound}
+                          {duplicateInfo.existingNameTool ? `: "${duplicateInfo.existingNameTool}"` : ""}
+                        </p>
+                      )}
+                      {!duplicateInfo.urlDuplicate && !duplicateInfo.nameDuplicate && duplicateInfo.fallbackReason && (
+                        <p className="text-sm opacity-90">{duplicateInfo.fallbackReason}</p>
+                      )}
                     </div>
                   </AlertDescription>
                 </Alert>
@@ -583,7 +764,7 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
           >
             <Button
               type="submit"
-              disabled={isSubmitting || checkDuplicate?.isDuplicate || Object.keys(validationErrors).length > 0}
+              disabled={isSubmitting || duplicateInfo.isDuplicate || Object.keys(validationErrors).length > 0}
               className="flex-1 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all relative overflow-hidden group"
               size="lg"
             >
