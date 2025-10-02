@@ -6,6 +6,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
 
 interface ToolsListProps {
   searchTerm: string;
@@ -170,27 +171,63 @@ export function ToolsList({
     return (
       <div className="space-y-6">
         {selectedCategory && (
-          <div className="mb-6 flex items-center gap-3">
-            <h2 className="text-2xl font-bold">{selectedCategory}</h2>
-            <Badge variant="default" className="text-xs shadow-sm">
+          <motion.div 
+            className="mb-6 flex items-center gap-3"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+              {selectedCategory}
+            </h2>
+            <Badge variant="default" className="text-xs shadow-md">
               {tools.length}
             </Badge>
-          </div>
+          </motion.div>
         )}
         
-        <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <motion.div 
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          style={{ gridAutoRows: '1fr' }}
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.05
+              }
+            }
+          }}
+        >
           {(paginatedTools || []).map((tool) => (
-            <ToolCard 
-              key={tool._id} 
-              tool={tool} 
-              language={language} 
-              config={{ 
-                size: 'compact', 
-                layout: 'vertical' 
-              }} 
-            />
+            <motion.div
+              key={tool._id}
+              className="flex"
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { 
+                  opacity: 1, 
+                  y: 0,
+                  transition: {
+                    duration: 0.4,
+                    ease: [0.16, 1, 0.3, 1]
+                  }
+                }
+              }}
+            >
+              <ToolCard 
+                tool={tool} 
+                language={language} 
+                config={{ 
+                  size: 'compact', 
+                  layout: 'vertical' 
+                }} 
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
         
         <PaginationControls />
       </div>
@@ -210,28 +247,68 @@ export function ToolsList({
 
   return (
     <div className="space-y-12">
-      {categories.map((category) => (
-        <div key={category}>
+      {categories.map((category, categoryIndex) => (
+        <motion.div 
+          key={category}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.5, 
+            delay: categoryIndex * 0.1,
+            ease: [0.16, 1, 0.3, 1]
+          }}
+        >
           <div className="mb-6 flex items-center gap-3">
-            <h2 className="text-2xl font-bold">{category}</h2>
-            <Badge variant="default" className="text-xs shadow-sm">
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+              {category}
+            </h2>
+            <Badge variant="default" className="text-xs shadow-md">
               {toolsByCategory[category].length}
             </Badge>
           </div>
-          <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <motion.div 
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            style={{ gridAutoRows: '1fr' }}
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.04
+                }
+              }
+            }}
+          >
             {toolsByCategory[category].map((tool) => (
-              <ToolCard 
-                key={tool._id} 
-                tool={tool} 
-                language={language} 
-                config={{ 
-                  size: 'compact', 
-                  layout: 'vertical' 
-                }} 
-              />
+              <motion.div
+                key={tool._id}
+                className="flex"
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { 
+                    opacity: 1, 
+                    y: 0,
+                    transition: {
+                      duration: 0.4,
+                      ease: [0.16, 1, 0.3, 1]
+                    }
+                  }
+                }}
+              >
+                <ToolCard 
+                  tool={tool} 
+                  language={language} 
+                  config={{ 
+                    size: 'compact', 
+                    layout: 'vertical' 
+                  }} 
+                />
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       ))}
     </div>
   );

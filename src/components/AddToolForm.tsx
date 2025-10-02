@@ -8,9 +8,10 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-
+import { Badge } from "./ui/badge";
 import { Alert, AlertDescription } from "./ui/alert";
-import { X, AlertCircle, Loader2 } from "lucide-react";
+import { X, AlertCircle, Loader2, Sparkles, Link2, FileText, Tag, DollarSign, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface AddToolFormProps {
   language: "en" | "vi";
@@ -202,67 +203,173 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
   };
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-xl sm:text-2xl mb-2">{t.addTool}</CardTitle>
-            <p className="text-muted-foreground">Share an amazing AI tool with the community</p>
-          </div>
-          <Button
-            onClick={onClose}
-            variant="ghost"
-            size="sm"
-            className="flex-shrink-0 ml-2"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">
-                {t.name} *
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                className={validationErrors.name ? 'border-destructive' : ''}
-                placeholder="e.g., ChatGPT, Midjourney"
-              />
-              {validationErrors.name && (
-                <p className="text-sm text-destructive">{validationErrors.name}</p>
-              )}
-            </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="max-w-4xl mx-auto border-2 shadow-2xl bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
+        <CardHeader className="relative overflow-hidden">
+          {/* Header gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-purple-500/5 to-pink-500/5" />
           
-            <div className="space-y-2">
-              <Label htmlFor="url">
-                {t.url} *
-              </Label>
-              <Input
-                id="url"
-                type="url"
-                required
-                value={formData.url}
-                onChange={(e) => handleInputChange("url", e.target.value)}
-                className={validationErrors.url ? 'border-destructive' : ''}
-                placeholder="https://example.com"
-              />
-              {validationErrors.url && (
-                <p className="text-sm text-destructive">{validationErrors.url}</p>
-              )}
+          <div className="relative flex justify-between items-start">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-3">
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                  className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/60 shadow-lg"
+                >
+                  <Sparkles className="w-6 h-6 text-primary-foreground" />
+                </motion.div>
+                <div>
+                  <CardTitle className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-600 to-pink-600">
+                    {t.addTool}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Share an amazing AI tool with the community
+                  </p>
+                </div>
+              </div>
             </div>
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="icon"
+              className="flex-shrink-0 ml-2 hover:bg-destructive/10 hover:text-destructive rounded-full"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">
-              {t.description} *
+          {/* Progress indicator */}
+          <motion.div 
+            className="mt-4 flex gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Badge variant="outline" className="gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              Quick & Easy
+            </Badge>
+            <Badge variant="outline" className="gap-1">
+              <Sparkles className="w-3 h-3" />
+              Instant Publish
+            </Badge>
+          </motion.div>
+        </CardHeader>
+
+        <CardContent className="relative">
+          <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-8">
+          {/* Section 1: Basic Info */}
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs">1</div>
+              <span>Basic Information</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  {t.name} <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    className={`transition-all ${validationErrors.name ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
+                    placeholder="e.g., ChatGPT, Midjourney"
+                  />
+                  {formData.name && !validationErrors.name && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    </motion.div>
+                  )}
+                </div>
+                <AnimatePresence>
+                  {validationErrors.name && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-destructive flex items-center gap-1"
+                    >
+                      <AlertCircle className="w-3 h-3" />
+                      {validationErrors.name}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+            
+              <div className="space-y-2">
+                <Label htmlFor="url" className="flex items-center gap-2 text-sm font-medium">
+                  <Link2 className="w-4 h-4 text-primary" />
+                  {t.url} <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="url"
+                    type="url"
+                    required
+                    value={formData.url}
+                    onChange={(e) => handleInputChange("url", e.target.value)}
+                    className={`transition-all ${validationErrors.url ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
+                    placeholder="https://example.com"
+                  />
+                  {formData.url && !validationErrors.url && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    </motion.div>
+                  )}
+                </div>
+                <AnimatePresence>
+                  {validationErrors.url && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-destructive flex items-center gap-1"
+                    >
+                      <AlertCircle className="w-3 h-3" />
+                      {validationErrors.url}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Description */}
+          <motion.div 
+            className="space-y-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <Label htmlFor="description" className="flex items-center gap-2 text-sm font-medium">
+              <FileText className="w-4 h-4 text-primary" />
+              {t.description} <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="description"
@@ -270,114 +377,246 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
               rows={4}
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
-              className={validationErrors.description ? 'border-destructive' : ''}
+              className={`transition-all resize-none ${validationErrors.description ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
               placeholder="Describe what this AI tool does and how it helps users..."
             />
-            {validationErrors.description && (
-              <p className="text-sm text-destructive">{validationErrors.description}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="category">
-                {t.category} *
-              </Label>
-              <Input
-                id="category"
-                type="text"
-                required
-                value={formData.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
-                className={validationErrors.category ? 'border-destructive' : ''}
-                placeholder="e.g., Writing & Content, Image Generation"
-              />
-              {validationErrors.category && (
-                <p className="text-sm text-destructive">{validationErrors.category}</p>
-              )}
+            <div className="flex justify-between items-center">
+              <AnimatePresence>
+                {validationErrors.description && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-sm text-destructive flex items-center gap-1"
+                  >
+                    <AlertCircle className="w-3 h-3" />
+                    {validationErrors.description}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+              <p className="text-xs text-muted-foreground ml-auto">
+                {formData.description.length} characters
+              </p>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="pricing">
-                {t.pricing} *
-              </Label>
-              <Select value={formData.pricing} onValueChange={(value) => handleInputChange("pricing", value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="free">{t.free}</SelectItem>
-                  <SelectItem value="freemium">{t.freemium}</SelectItem>
-                  <SelectItem value="paid">{t.paid}</SelectItem>
-                </SelectContent>
-              </Select>
+          </motion.div>
+
+          {/* Section 2: Categorization */}
+          <motion.div 
+            className="space-y-6 pt-6 border-t"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs">2</div>
+              <span>Categorization & Pricing</span>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tags">
-              {t.tags}
-            </Label>
-            <Input
-              id="tags"
-              type="text"
-              value={formData.tags}
-              onChange={(e) => handleInputChange("tags", e.target.value)}
-              placeholder="AI, Machine Learning, Automation, Creative"
-            />
-            <p className="text-sm text-muted-foreground">Separate tags with commas. Maximum 10 tags.</p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="logoUrl">
-              {t.logoUrl}
-            </Label>
-            <Input
-              id="logoUrl"
-              type="url"
-              value={formData.logoUrl}
-              onChange={(e) => handleInputChange("logoUrl", e.target.value)}
-              placeholder="https://example.com/logo.png"
-            />
-          </div>
-
-          {checkDuplicate?.isDuplicate && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                <div>
-                  <p className="font-medium">{t.duplicateFound}</p>
-                  <p className="text-sm">{checkDuplicate.reason}: "{checkDuplicate.existingTool}"</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="category" className="flex items-center gap-2 text-sm font-medium">
+                  <Tag className="w-4 h-4 text-primary" />
+                  {t.category} <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="category"
+                    type="text"
+                    required
+                    value={formData.category}
+                    onChange={(e) => handleInputChange("category", e.target.value)}
+                    className={`transition-all ${validationErrors.category ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}`}
+                    placeholder="e.g., Writing & Content, Image Generation"
+                  />
+                  {formData.category && !validationErrors.category && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    </motion.div>
+                  )}
                 </div>
-              </AlertDescription>
-            </Alert>
-          )}
+                <AnimatePresence>
+                  {validationErrors.category && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-destructive flex items-center gap-1"
+                    >
+                      <AlertCircle className="w-3 h-3" />
+                      {validationErrors.category}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="pricing" className="flex items-center gap-2 text-sm font-medium">
+                  <DollarSign className="w-4 h-4 text-primary" />
+                  {t.pricing} <span className="text-destructive">*</span>
+                </Label>
+                <Select value={formData.pricing} onValueChange={(value) => handleInputChange("pricing", value)}>
+                  <SelectTrigger className="transition-all focus:ring-primary">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">
+                      <div className="flex items-center gap-2">
+                        <span>🆓</span>
+                        <span>{t.free}</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="freemium">
+                      <div className="flex items-center gap-2">
+                        <span>⭐</span>
+                        <span>{t.freemium}</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="paid">
+                      <div className="flex items-center gap-2">
+                        <span>💎</span>
+                        <span>{t.paid}</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </motion.div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 border-t">
+          {/* Section 3: Additional Details */}
+          <motion.div 
+            className="space-y-6 pt-6 border-t"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs">3</div>
+              <span>Additional Details (Optional)</span>
+            </div>
+
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="tags" className="flex items-center gap-2 text-sm font-medium">
+                  <Tag className="w-4 h-4 text-muted-foreground" />
+                  {t.tags}
+                </Label>
+                <Input
+                  id="tags"
+                  type="text"
+                  value={formData.tags}
+                  onChange={(e) => handleInputChange("tags", e.target.value)}
+                  className="transition-all focus-visible:ring-primary"
+                  placeholder="AI, Machine Learning, Automation, Creative"
+                />
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">Separate tags with commas</p>
+                  {formData.tags && (
+                    <Badge variant="secondary" className="text-xs">
+                      {formData.tags.split(',').filter(t => t.trim()).length} tags
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="logoUrl" className="flex items-center gap-2 text-sm font-medium">
+                  <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                  {t.logoUrl}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="logoUrl"
+                    type="url"
+                    value={formData.logoUrl}
+                    onChange={(e) => handleInputChange("logoUrl", e.target.value)}
+                    className="transition-all focus-visible:ring-primary"
+                    placeholder="https://example.com/logo.png"
+                  />
+                  {formData.logoUrl && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    </motion.div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Provide a direct link to the tool's logo image</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Duplicate Warning */}
+          <AnimatePresence>
+            {checkDuplicate?.isDuplicate && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Alert variant="destructive" className="border-2">
+                  <AlertCircle className="h-5 w-5" />
+                  <AlertDescription>
+                    <div className="space-y-1">
+                      <p className="font-semibold text-base">{t.duplicateFound}</p>
+                      <p className="text-sm opacity-90">{checkDuplicate.reason}: "{checkDuplicate.existingTool}"</p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Submit Actions */}
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-3 pt-8 border-t"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
             <Button
               type="submit"
               disabled={isSubmitting || checkDuplicate?.isDuplicate || Object.keys(validationErrors).length > 0}
-              className="flex-1"
+              className="flex-1 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all relative overflow-hidden group"
+              size="lg"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t.submitting}
-                </>
-              ) : (
-                t.submit
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    {t.submitting}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5" />
+                    {t.submit}
+                  </>
+                )}
+              </span>
+              {!isSubmitting && (
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary-foreground/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               )}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
+              className="sm:w-32 h-12 border-2"
+              size="lg"
             >
               {t.cancel}
             </Button>
-          </div>
+          </motion.div>
         </form>
       </CardContent>
     </Card>
+    </motion.div>
   );
 }
