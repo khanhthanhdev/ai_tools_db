@@ -1,9 +1,7 @@
 import { Authenticated, Unauthenticated } from "convex/react";
 import { Link, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
-import { LanguageToggle } from "./LanguageToggle";
-import { SignOutButton } from "../SignOutButton";
-import { SignInForm } from "../SignInForm";
+import { LanguageToggle } from "./LanguageToggle";;
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -105,9 +103,6 @@ export function Layout({
           {/* Right side: Language & Auth */}
           <div className="flex items-center gap-1 sm:gap-2">
             <LanguageToggle language={language} onLanguageChange={setLanguage} />
-            <Authenticated>
-              <SignOutButton />
-            </Authenticated>
             <Unauthenticated>
               <Dialog>
                 <DialogTrigger asChild>
@@ -124,7 +119,6 @@ export function Layout({
                         : t.signInDescriptionVI}
                     </DialogDescription>
                   </DialogHeader>
-                  <SignInForm />
                 </DialogContent>
               </Dialog>
             </Unauthenticated>

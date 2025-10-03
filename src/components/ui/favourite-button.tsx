@@ -2,9 +2,8 @@ import { Heart } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { useAuth } from "@clerk/clerk-react";
+
 import { toast } from "sonner";
-import { Button } from "./button";
 import { cn } from "@/lib/utils";
 
 interface FavouriteButtonProps {
@@ -13,7 +12,7 @@ interface FavouriteButtonProps {
 }
 
 export function FavouriteButton({ toolId, className }: FavouriteButtonProps) {
-  const { userId } = useAuth();
+  const user = useQuery(api.auth.loggedInUser);
   const isFavourited = useQuery(api.favourites.isFavourited, { toolId });
   const toggleFavourite = useMutation(api.favourites.toggleFavourite);
 
@@ -21,7 +20,7 @@ export function FavouriteButton({ toolId, className }: FavouriteButtonProps) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!userId) {
+    if (!user) {
       toast.error("You must be logged in to favourite a tool.");
       return;
     }
@@ -33,17 +32,26 @@ export function FavouriteButton({ toolId, className }: FavouriteButtonProps) {
       } else {
         toast.info("Tool removed from favourites.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update favourites.");
     }
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={cn("absolute top-2 right-2 z-10", className)}
-      onClick={handleFavouriteClick}
+    <button
+      type="button"
+      className={cn(
+        "absolute top-2 right-2 z-10",
+        "inline-flex items-center justify-center",
+        "h-10 w-10 rounded-md",
+        "text-sm font-medium",
+        "transition-colors",
+        "hover:bg-accent hover:text-accent-foreground",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "disabled:pointer-events-none disabled:opacity-50",
+        className
+      )}
+      onClick={(e) => { void handleFavouriteClick(e); }}
     >
       <Heart
         className={cn(
@@ -51,6 +59,6 @@ export function FavouriteButton({ toolId, className }: FavouriteButtonProps) {
           isFavourited && "fill-red-500 text-red-500"
         )}
       />
-    </Button>
+    </button>
   );
 }
