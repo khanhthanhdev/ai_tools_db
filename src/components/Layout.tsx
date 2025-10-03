@@ -1,17 +1,11 @@
 import { Authenticated, Unauthenticated } from "convex/react";
 import { Link, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
-import { LanguageToggle } from "./LanguageToggle";;
+import { LanguageToggle } from "./LanguageToggle";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
 import BeamsBackground from "./kokonutui/beams-background";
+import { SignInDialog } from "./SignInDialog";
+import { useAuthActions } from "@convex-dev/auth/react";
 import React from "react";
 
 type Language = "en" | "vi";
@@ -21,11 +15,12 @@ const translations = {
     title: "AI Tools Database",
     addTool: "Add Tool",
     browse: "Browse",
-    myTools: "My Tools",
+    favourites: "Favourites",
     stats: "Statistics",
     aboutUs: "About Us",
     signInPrompt: "Sign in to add and manage AI tools",
     signIn: "Sign in",
+    signOut: "Sign Out",
     signInDescription: "Sign in to add and manage AI tools",
     signInDescriptionVI: "Đăng nhập để thêm và quản lý công cụ AI",
   },
@@ -33,11 +28,12 @@ const translations = {
     title: "Cơ sở dữ liệu công cụ AI",
     addTool: "Thêm công cụ",
     browse: "Duyệt",
-    myTools: "Công cụ của tôi",
+    favourites: "Yêu thích",
     stats: "Thống kê",
     aboutUs: "Giới thiệu",
     signInPrompt: "Đăng nhập để thêm và quản lý công cụ AI",
     signIn: "Đăng nhập",
+    signOut: "Đăng Xuất",
     signInDescription: "Sign in to add and manage AI tools",
     signInDescriptionVI: "Đăng nhập để thêm và quản lý công cụ AI",
   },
@@ -53,10 +49,15 @@ export function Layout({
   setLanguage: (language: Language) => void;
 }) {
   const location = useLocation();
+  const { signOut } = useAuthActions();
   const t = translations[language];
 
   const getVariant = (path: string) => {
     return location.pathname === path ? "default" : "ghost";
+  };
+
+  const handleSignOut = () => {
+    void signOut();
   };
 
   return (
@@ -91,8 +92,8 @@ export function Layout({
               <Button asChild variant={getVariant("/add-tool")} size="sm">
                 <Link to="/add-tool">{t.addTool}</Link>
               </Button>
-              <Button asChild variant={getVariant("/my-tools")} size="sm">
-                <Link to="/my-tools">{t.myTools}</Link>
+              <Button asChild variant={getVariant("/favourites")} size="sm">
+                <Link to="/favourites">{t.favourites}</Link>
               </Button>
               <Button asChild variant={getVariant("/stats")} size="sm">
                 <Link to="/stats">{t.stats}</Link>
@@ -103,24 +104,17 @@ export function Layout({
           {/* Right side: Language & Auth */}
           <div className="flex items-center gap-1 sm:gap-2">
             <LanguageToggle language={language} onLanguageChange={setLanguage} />
+            <Authenticated>
+              <Button onClick={handleSignOut} variant="outline" size="sm" className="shadow-sm text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
+                {t.signOut}
+              </Button>
+            </Authenticated>
             <Unauthenticated>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="shadow-sm text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
-                    {t.signIn}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>{t.signInPrompt}</DialogTitle>
-                    <DialogDescription>
-                      {language === "en"
-                        ? t.signInDescription
-                        : t.signInDescriptionVI}
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
+              <SignInDialog language={language}>
+                <Button size="sm" className="shadow-sm text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
+                  {t.signIn}
+                </Button>
+              </SignInDialog>
             </Unauthenticated>
           </div>
         </div>
@@ -139,8 +133,8 @@ export function Layout({
                 <Button asChild variant={getVariant("/add-tool")} size="sm" className="whitespace-nowrap text-xs h-8">
                   <Link to="/add-tool">{t.addTool}</Link>
                 </Button>
-                <Button asChild variant={getVariant("/my-tools")} size="sm" className="whitespace-nowrap text-xs h-8">
-                  <Link to="/my-tools">{t.myTools}</Link>
+                <Button asChild variant={getVariant("/favourites")} size="sm" className="whitespace-nowrap text-xs h-8">
+                  <Link to="/favourites">{t.favourites}</Link>
                 </Button>
                 <Button asChild variant={getVariant("/stats")} size="sm" className="whitespace-nowrap text-xs h-8">
                   <Link to="/stats">{t.stats}</Link>

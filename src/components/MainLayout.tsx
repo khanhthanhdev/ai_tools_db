@@ -6,9 +6,11 @@ import { Button } from "./ui/button";
 import { Sparkles } from "lucide-react";
 import BeamsBackground from "./kokonutui/beams-background";
 import { Authenticated, Unauthenticated, useMutation } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 import { translations } from "../translations";
+import { SignInDialog } from "./SignInDialog";
 
 type Language = "en" | "vi";
 
@@ -20,9 +22,8 @@ interface MainLayoutProps {
 export function MainLayout({ children, initialLanguage = "en" }: MainLayoutProps) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const seedData = useMutation(api.sampleData.seedSampleData);
-  const signIn = useMutation(api.auth.signIn);
-  const signOut = useMutation(api.auth.signOut);
-  const t = (key: keyof (typeof translations)["en"]) => translations[language][key] || translations["en"][key];
+  const { signOut } = useAuthActions();
+  const t = (key: keyof (typeof translations)["en"]) => (translations[language] as typeof translations["en"])[key] || translations["en"][key];
 
   const handleSeedData = async () => {
     try {
@@ -32,9 +33,13 @@ export function MainLayout({ children, initialLanguage = "en" }: MainLayoutProps
       } else {
         toast.success(t("dataLoaded"));
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load sample data.");
     }
+  };
+
+  const handleSignOut = () => {
+    void signOut();
   };
 
   return (
@@ -60,19 +65,21 @@ export function MainLayout({ children, initialLanguage = "en" }: MainLayoutProps
             <Button asChild variant="ghost" size="sm" className="px-2 text-xs sm:text-sm">
               <Link to="/about-us">{t("aboutUs")}</Link>
             </Button>
-            <Button onClick={handleSeedData} variant="outline" size="sm">
+            <Button onClick={() => void handleSeedData()} variant="outline" size="sm">
               {t("loadSample")}
             </Button>
             <LanguageToggle language={language} onLanguageChange={setLanguage} />
             <Authenticated>
-              <Button onClick={() => signOut()} variant="outline" size="sm">
+              <Button onClick={handleSignOut} variant="outline" size="sm">
                 Sign Out
               </Button>
             </Authenticated>
             <Unauthenticated>
-              <Button onClick={() => signIn({ provider: "Anonymous" })} variant="default" size="sm">
-                Sign In
-              </Button>
+              <SignInDialog language={language}>
+                <Button variant="default" size="sm">
+                  Sign In
+                </Button>
+              </SignInDialog>
             </Unauthenticated>
           </div>
         </div>

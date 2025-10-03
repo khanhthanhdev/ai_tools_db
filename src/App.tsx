@@ -7,8 +7,8 @@ const AddToolPage = lazy(() =>
   import("./pages/AddToolPage").then((module) => ({ default: module.AddToolPage }))
 );
 
-const MyToolsPage = lazy(() =>
-  import("./pages/MyToolsPage").then((module) => ({ default: module.MyToolsPage }))
+const FavouritesPage = lazy(() =>
+  import("./pages/FavouritesPage").then((module) => ({ default: module.FavouritesPage }))
 );
 
 const StatsPage = lazy(() =>
@@ -26,10 +26,6 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/about-us" element={<AboutUsPage />} />
-
-      </Routes>
       <Layout language={language} setLanguage={setLanguage}>
         <Routes>
           <Route path="/" element={<BrowsePage language={language} />} />
@@ -42,10 +38,10 @@ export default function App() {
             }
           />
           <Route
-            path="/my-tools"
+            path="/favourites"
             element={
               <Suspense fallback={<div className="py-10 text-center">Loading...</div>}>
-                <MyToolsPage language={language} />
+                <FavouritesPage language={language} />
               </Suspense>
             }
           />

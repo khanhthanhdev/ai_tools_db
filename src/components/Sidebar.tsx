@@ -62,7 +62,7 @@ export function Sidebar({
           <Button
             variant={selectedPricing === "" ? "secondary" : "ghost"}
             onClick={() => handlePricingSelect("")}
-            className="h-9 w-full justify-start text-sm font-medium"
+            className="h-9 w-full !justify-start text-left text-sm font-medium"
           >
             <span className="mr-2">🌟</span>
             {t.all}
@@ -72,7 +72,7 @@ export function Sidebar({
               key={option.value}
               variant={selectedPricing === option.value ? "secondary" : "ghost"}
               onClick={() => handlePricingSelect(option.value)}
-              className="h-9 w-full justify-start text-sm font-medium"
+              className="h-9 w-full !justify-start text-left text-sm font-medium"
             >
               <span className="mr-2">{option.icon}</span>
               {option.label}
@@ -91,7 +91,7 @@ export function Sidebar({
           <Button
             variant={selectedCategory === "" ? "secondary" : "ghost"}
             onClick={() => handleCategorySelect("")}
-            className="h-9 w-full justify-start text-sm font-medium"
+            className="h-9 w-full !justify-start text-left text-sm font-medium"
           >
             <span className="mr-2">📂</span>
             {t.all}
@@ -101,7 +101,7 @@ export function Sidebar({
               key={category}
               variant={selectedCategory === category ? "secondary" : "ghost"}
               onClick={() => handleCategorySelect(category)}
-              className="h-9 w-full justify-start text-sm font-medium"
+              className="h-9 w-full !justify-start text-left text-sm font-medium"
             >
               <span className="mr-2">🔧</span>
               <span className="truncate">{category}</span>
