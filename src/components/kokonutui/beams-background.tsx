@@ -132,10 +132,12 @@ export default function BeamsBackground({
             ctx.translate(beam.x, beam.y);
             ctx.rotate((beam.angle * Math.PI) / 180);
 
+            const intensityMultiplier = opacityMap[intensity] ?? opacityMap.strong;
+
             const pulsingOpacity =
                 beam.opacity *
                 (0.8 + Math.sin(beam.pulse) * 0.2) *
-                opacityMap[intensity];
+                intensityMultiplier;
 
             const gradient = ctx.createLinearGradient(0, 0, 0, beam.length);
 
