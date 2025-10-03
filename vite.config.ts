@@ -65,10 +65,6 @@ window.addEventListener('message', async (message) => {
             return undefined;
           }
 
-          if (id.includes("react-dom") || id.includes(`${path.sep}react${path.sep}`)) {
-            return "react-vendor";
-          }
-
           if (id.includes("react-router")) {
             return "router-vendor";
           }
