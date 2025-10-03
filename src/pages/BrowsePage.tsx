@@ -317,12 +317,14 @@ export function BrowsePage({ language }: { language: Language }) {
           variant="desktop"
         />
         <main className="min-h-[calc(100vh-8rem)] flex-1">
-          <ToolsList
-            searchTerm={searchTerm}
-            selectedCategory={selectedCategory}
-            selectedPricing={selectedPricing}
-            language={language}
-          />
+          <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
+            <ToolsList
+              searchTerm={searchTerm}
+              selectedCategory={selectedCategory}
+              selectedPricing={selectedPricing}
+              language={language}
+            />
+          </div>
         </main>
       </div>
     </>

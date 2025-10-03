@@ -20,14 +20,16 @@ export function AddToolPage({ language }: { language: Language }) {
   const t = translations[language];
 
   return (
-    <Card className="mx-auto max-w-4xl shadow-sm">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">{t.addTool}</CardTitle>
-        <CardDescription>{t.shareTool}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <AddToolForm language={language} onClose={() => navigate("/")} />
-      </CardContent>
-    </Card>
+    <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
+      <Card className="mx-auto max-w-4xl shadow-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">{t.addTool}</CardTitle>
+          <CardDescription>{t.shareTool}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AddToolForm language={language} onClose={() => navigate("/")} />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
