@@ -152,9 +152,7 @@ export function Layout({
       </Authenticated>
 
       <main className="min-h-[calc(100vh-8rem)] flex-1">
-        <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );
