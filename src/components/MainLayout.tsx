@@ -5,18 +5,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { Button } from "./ui/button";
 import { Sparkles } from "lucide-react";
 import BeamsBackground from "./kokonutui/beams-background";
-import { Authenticated, Unauthenticated } from "convex/react";
-import { SignInForm } from "../SignInForm";
-import { SignOutButton } from "../SignOutButton";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import { useMutation } from "convex/react";
+import { Authenticated, Unauthenticated, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 import { translations } from "../translations";
@@ -31,6 +20,8 @@ interface MainLayoutProps {
 export function MainLayout({ children, initialLanguage = "en" }: MainLayoutProps) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const seedData = useMutation(api.sampleData.seedSampleData);
+  const signIn = useMutation(api.auth.signIn);
+  const signOut = useMutation(api.auth.signOut);
   const t = (key: keyof (typeof translations)["en"]) => translations[language][key] || translations["en"][key];
 
   const handleSeedData = async () => {
@@ -74,25 +65,14 @@ export function MainLayout({ children, initialLanguage = "en" }: MainLayoutProps
             </Button>
             <LanguageToggle language={language} onLanguageChange={setLanguage} />
             <Authenticated>
-              <SignOutButton />
+              <Button onClick={() => signOut()} variant="outline" size="sm">
+                Sign Out
+              </Button>
             </Authenticated>
             <Unauthenticated>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="shadow-sm text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
-                    Sign in
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>{t("signInPrompt")}</DialogTitle>
-                    <DialogDescription>
-                      {t("signInDescription")}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <SignInForm />
-                </DialogContent>
-              </Dialog>
+              <Button onClick={() => signIn({ provider: "Anonymous" })} variant="default" size="sm">
+                Sign In
+              </Button>
             </Unauthenticated>
           </div>
         </div>
