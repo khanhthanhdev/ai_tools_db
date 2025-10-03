@@ -3,6 +3,7 @@ import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -120,7 +121,10 @@ export function Sidebar({
   }
 
   return (
-    <aside
+    <motion.aside
+      initial={{ y: "-100%", opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
       className={cn(
         "hidden lg:block sticky top-16 h-[calc(100vh-4rem)] w-64 flex-shrink-0 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
         className,
@@ -129,6 +133,6 @@ export function Sidebar({
       <div className="h-full overflow-y-auto p-6">
         {content}
       </div>
-    </aside>
+    </motion.aside>
   );
 }
