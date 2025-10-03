@@ -1,4 +1,4 @@
-import { UserToolsManager } from "../components/UserToolsManager";
+import { Suspense, lazy } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 
 type Language = "en" | "vi";
@@ -14,6 +14,10 @@ const translations = {
   },
 };
 
+const UserToolsManager = lazy(() =>
+  import("../components/UserToolsManager").then((module) => ({ default: module.UserToolsManager }))
+);
+
 export function MyToolsPage({ language }: { language: Language }) {
   const t = translations[language];
 
@@ -25,7 +29,9 @@ export function MyToolsPage({ language }: { language: Language }) {
           <CardDescription>{t.manageTools}</CardDescription>
         </CardHeader>
         <CardContent>
-          <UserToolsManager language={language} />
+          <Suspense fallback={<div className="py-6 text-center">Loading...</div>}>
+            <UserToolsManager language={language} />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

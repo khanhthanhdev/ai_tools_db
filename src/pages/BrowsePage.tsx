@@ -41,8 +41,24 @@ export function BrowsePage({ language }: { language: Language }) {
   const t = translations[language];
 
   return (
-    <>
-      <div className="relative mb-8 sm:mb-12 text-center overflow-hidden">
+    <div className="relative flex">
+      {/* Sidebar - Fixed space on the left (desktop only) */}
+      <Sidebar
+        isOpen={false}
+        onClose={() => {}}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        selectedPricing={selectedPricing}
+        onPricingChange={setSelectedPricing}
+        language={language}
+        translations={t}
+        variant="desktop"
+      />
+      
+      {/* Main Content Area - Centered in remaining space */}
+      <div className="flex-1 w-full lg:ml-64">
+        {/* Hero Section with decorative elements */}
+        <div className="relative mb-8 sm:mb-12 text-center overflow-hidden">
         {/* Floating Icons and Shapes */}
         <div className="absolute inset-0 pointer-events-none hidden sm:block">
           {/* Sparkles Icon - Top Left */}
@@ -262,7 +278,7 @@ export function BrowsePage({ language }: { language: Language }) {
       </div>
 
       <motion.div
-        className="mb-8"
+        className="mb-8 container max-w-7xl px-3 sm:px-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -285,7 +301,7 @@ export function BrowsePage({ language }: { language: Language }) {
 
       {/* Mobile Category Filter - Horizontal scrolling below search */}
       <motion.div
-        className="mb-8 lg:hidden"
+        className="mb-8 container max-w-7xl px-3 sm:px-6 lg:hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -304,29 +320,18 @@ export function BrowsePage({ language }: { language: Language }) {
         />
       </motion.div>
 
-      <div className="flex flex-col lg:flex-row">
-        <Sidebar
-          isOpen={false}
-          onClose={() => {}}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedPricing={selectedPricing}
-          onPricingChange={setSelectedPricing}
-          language={language}
-          translations={t}
-          variant="desktop"
-        />
-        <main className="min-h-[calc(100vh-8rem)] flex-1">
-          <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
-            <ToolsList
-              searchTerm={searchTerm}
-              selectedCategory={selectedCategory}
-              selectedPricing={selectedPricing}
-              language={language}
-            />
-          </div>
-        </main>
+      {/* Main Content with Tools List */}
+      <main className="min-h-[calc(100vh-8rem)]">
+        <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
+          <ToolsList
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+            selectedPricing={selectedPricing}
+            language={language}
+          />
+        </div>
+      </main>
       </div>
-    </>
+    </div>
   );
 }

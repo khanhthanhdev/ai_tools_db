@@ -36,8 +36,70 @@ window.addEventListener('message', async (message) => {
     // End of code for taking screenshots on chef.convex.dev.
   ].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    alias: [
+      {
+        find: "react-router/dom",
+        replacement: path.resolve(
+          __dirname,
+          "./node_modules/react-router/dist/production/dom-export.mjs"
+        ),
+      },
+      {
+        find: "react-router",
+        replacement: path.resolve(
+          __dirname,
+          "./node_modules/react-router/dist/production/index.mjs"
+        ),
+      },
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "./src"),
+      },
+    ],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) {
+            return undefined;
+          }
+
+          if (id.includes("react-dom") || id.includes(`${path.sep}react${path.sep}`)) {
+            return "react-vendor";
+          }
+
+          if (id.includes("react-router")) {
+            return "router-vendor";
+          }
+
+          if (id.includes("@radix-ui")) {
+            return "radix-vendor";
+          }
+
+          if (id.includes("framer-motion") || id.includes(`${path.sep}motion${path.sep}`)) {
+            return "motion-vendor";
+          }
+
+          if (id.includes(`${path.sep}convex${path.sep}`) || id.includes("@convex-dev")) {
+            return "convex-vendor";
+          }
+
+          if (id.includes("tailwind-merge")) {
+            return "tailwind-merge";
+          }
+
+          if (id.includes("sonner")) {
+            return "toast-vendor";
+          }
+
+          if (id.includes("lucide-react")) {
+            return "icon-vendor";
+          }
+
+          return "vendor";
+        },
+      },
     },
   },
 }));

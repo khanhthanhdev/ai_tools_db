@@ -274,7 +274,7 @@ export function AboutUsPage() {
         <BeamsBackground intensity="subtle" className="h-full w-full" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
           <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2 text-sm font-semibold sm:text-base">
@@ -291,7 +291,7 @@ export function AboutUsPage() {
             <LanguageToggle language={language} onLanguageChange={setLanguage} />
           </div>
         </div>
-      </header>
+      </header> */}
 
       <main className="container mx-auto flex max-w-6xl flex-col gap-16 px-4 py-12 sm:px-6 sm:py-16">
         <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
