@@ -1,8 +1,12 @@
+import { Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
-import { AddToolForm } from "../components/AddToolForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 
 type Language = "en" | "vi";
+
+const AddToolForm = lazy(() =>
+  import("../components/AddToolForm").then((module) => ({ default: module.AddToolForm }))
+);
 
 const translations = {
   en: {
@@ -27,7 +31,9 @@ export function AddToolPage({ language }: { language: Language }) {
           <CardDescription>{t.shareTool}</CardDescription>
         </CardHeader>
         <CardContent>
-          <AddToolForm language={language} onClose={() => navigate("/")} />
+          <Suspense fallback={<div className="py-6 text-center">Loading...</div>}>
+            <AddToolForm language={language} onClose={() => navigate("/")} />
+          </Suspense>
         </CardContent>
       </Card>
     </div>
