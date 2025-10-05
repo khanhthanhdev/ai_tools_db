@@ -65,30 +65,67 @@ window.addEventListener('message', async (message) => {
             return undefined;
           }
 
+          // React core libraries
+          if (id.includes("react") || id.includes("react-dom") || id.includes("scheduler")) {
+            return "react-vendor";
+          }
+
+          // React Router
           if (id.includes("react-router")) {
             return "router-vendor";
           }
 
+          // Motion/animations
           if (id.includes("framer-motion") || id.includes(`${path.sep}motion${path.sep}`)) {
             return "motion-vendor";
           }
 
+          // Convex
           if (id.includes(`${path.sep}convex${path.sep}`) || id.includes("@convex-dev")) {
             return "convex-vendor";
           }
 
-          if (id.includes("tailwind-merge")) {
-            return "tailwind-merge";
+          // Radix UI components
+          if (id.includes("@radix-ui")) {
+            return "radix-vendor";
           }
 
-          if (id.includes("sonner")) {
-            return "toast-vendor";
+          // Form libraries
+          if (id.includes("react-hook-form") || id.includes("zod") || id.includes("@hookform")) {
+            return "form-vendor";
           }
 
+          // Charts
+          if (id.includes("recharts") || id.includes("d3-")) {
+            return "chart-vendor";
+          }
+
+          // Icons
           if (id.includes("lucide-react")) {
             return "icon-vendor";
           }
 
+          // Toast notifications
+          if (id.includes("sonner")) {
+            return "toast-vendor";
+          }
+
+          // Utility libraries
+          if (id.includes("tailwind-merge") || id.includes("clsx") || id.includes("class-variance-authority")) {
+            return "utils-vendor";
+          }
+
+          // Date utilities
+          if (id.includes("date-fns")) {
+            return "date-vendor";
+          }
+
+          // Carousel
+          if (id.includes("embla-carousel")) {
+            return "carousel-vendor";
+          }
+
+          // Everything else
           return "vendor";
         },
       },

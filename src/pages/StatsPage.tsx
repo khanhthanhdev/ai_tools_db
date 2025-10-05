@@ -1,5 +1,4 @@
 import { DatabaseStats } from "../components/DatabaseStats";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { SEO } from "../components/SEO";
 import { generateBreadcrumbStructuredData } from "../lib/structuredData";
 
@@ -38,16 +37,12 @@ export function StatsPage({ language }: { language: Language }) {
         structuredData={breadcrumbData}
       />
       <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
-      <Card className="mx-auto max-w-7xl shadow-sm">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl">{t.stats}</CardTitle>
-          <CardDescription>{t.insights}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DatabaseStats language={language} />
-        </CardContent>
-      </Card>
-    </div>
+        <div className="mb-6">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{t.stats}</h1>
+          <p className="text-muted-foreground mt-2">{t.insights}</p>
+        </div>
+        <DatabaseStats language={language} />
+      </div>
     </>
   );
 }

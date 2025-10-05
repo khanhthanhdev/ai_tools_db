@@ -1,5 +1,30 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
 interface DatabaseStatsProps {
   language: "en" | "vi";
@@ -8,26 +33,42 @@ interface DatabaseStatsProps {
 const translations = {
   en: {
     stats: "Database Statistics",
+    overview: "Quick overview of AI tools in the database",
     totalTools: "Total AI Tools",
     categories: "Categories",
-    freeTools: "Free Tools",
-    freemiumTools: "Freemium Tools",
-    paidTools: "Paid Tools",
-    englishTools: "English Tools",
-    vietnameseTools: "Vietnamese Tools",
+    pricingDistribution: "Pricing Distribution",
+    languageDistribution: "Language Distribution",
+    freeTools: "Free",
+    freemiumTools: "Freemium",
+    paidTools: "Paid",
+    englishTools: "English",
+    vietnameseTools: "Vietnamese",
     loading: "Loading stats...",
+    tools: "tools",
   },
   vi: {
     stats: "Thống kê cơ sở dữ liệu",
+    overview: "Tổng quan về các công cụ AI trong cơ sở dữ liệu",
     totalTools: "Tổng số công cụ AI",
     categories: "Danh mục",
-    freeTools: "Công cụ miễn phí",
-    freemiumTools: "Công cụ Freemium",
-    paidTools: "Công cụ trả phí",
-    englishTools: "Công cụ tiếng Anh",
-    vietnameseTools: "Công cụ tiếng Việt",
+    pricingDistribution: "Phân bổ giá",
+    languageDistribution: "Phân bổ ngôn ngữ",
+    freeTools: "Miễn phí",
+    freemiumTools: "Freemium",
+    paidTools: "Trả phí",
+    englishTools: "Tiếng Anh",
+    vietnameseTools: "Tiếng Việt",
     loading: "Đang tải thống kê...",
+    tools: "công cụ",
   },
+};
+
+const COLORS = {
+  free: "hsl(142, 76%, 36%)",
+  freemium: "hsl(48, 96%, 53%)",
+  paid: "hsl(0, 84%, 60%)",
+  en: "hsl(221, 83%, 53%)",
+  vi: "hsl(330, 81%, 60%)",
 };
 
 export function DatabaseStats({ language }: DatabaseStatsProps) {
@@ -36,39 +77,189 @@ export function DatabaseStats({ language }: DatabaseStatsProps) {
 
   if (!stats) {
     return (
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">{t.stats}</h3>
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded"></div>
-        </div>
-        <p className="text-gray-500 text-sm mt-4">{t.loading}</p>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.stats}</CardTitle>
+            <CardDescription>{t.loading}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="animate-pulse space-y-4">
+              <div className="h-32 bg-gray-200 rounded"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const statItems = [
-    { label: t.totalTools, value: stats.total, color: "bg-blue-500", icon: "🤖" },
-    { label: t.categories, value: stats.categories, color: "bg-purple-500", icon: "📂" },
-    { label: t.freeTools, value: stats.byPricing.free, color: "bg-green-500", icon: "🆓" },
-    { label: t.freemiumTools, value: stats.byPricing.freemium, color: "bg-yellow-500", icon: "⭐" },
-    { label: t.paidTools, value: stats.byPricing.paid, color: "bg-red-500", icon: "💎" },
-    { label: t.englishTools, value: stats.byLanguage.en, color: "bg-indigo-500", icon: "🇺🇸" },
-    { label: t.vietnameseTools, value: stats.byLanguage.vi, color: "bg-pink-500", icon: "🇻🇳" },
+  const pricingData = [
+    { name: t.freeTools, value: stats.byPricing.free, fill: COLORS.free },
+    {
+      name: t.freemiumTools,
+      value: stats.byPricing.freemium,
+      fill: COLORS.freemium,
+    },
+    { name: t.paidTools, value: stats.byPricing.paid, fill: COLORS.paid },
   ];
 
+  const languageData = [
+    { name: t.englishTools, value: stats.byLanguage.en, fill: COLORS.en },
+    { name: t.vietnameseTools, value: stats.byLanguage.vi, fill: COLORS.vi },
+  ];
+
+  const chartConfig = {
+    free: { label: t.freeTools, color: COLORS.free },
+    freemium: { label: t.freemiumTools, color: COLORS.freemium },
+    paid: { label: t.paidTools, color: COLORS.paid },
+    en: { label: t.englishTools, color: COLORS.en },
+    vi: { label: t.vietnameseTools, color: COLORS.vi },
+  };
+
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border p-4 sm:p-6">
-      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">{t.stats}</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
-        {statItems.map((item, index) => (
-          <div key={index} className="text-center p-3 sm:p-4 bg-gray-50 rounded-lg sm:rounded-xl">
-            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">{item.icon}</div>
-            <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{item.value}</div>
-            <div className="text-xs sm:text-sm text-gray-600 leading-tight">{item.label}</div>
-          </div>
-        ))}
+    <div className="space-y-3 sm:space-y-6">
+      {/* Key Metrics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <Card>
+          <CardHeader className="pb-2 px-4 pt-4 sm:p-6 sm:pb-2">
+            <CardDescription className="text-xs sm:text-sm">
+              {t.totalTools}
+            </CardDescription>
+            <CardTitle className="text-2xl sm:text-3xl lg:text-4xl">
+              {stats.total}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 sm:p-6 sm:pt-0">
+            <p className="text-xs text-muted-foreground">{t.tools}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2 px-4 pt-4 sm:p-6 sm:pb-2">
+            <CardDescription className="text-xs sm:text-sm">
+              {t.categories}
+            </CardDescription>
+            <CardTitle className="text-2xl sm:text-3xl lg:text-4xl">
+              {stats.categories}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 sm:p-6 sm:pt-0">
+            <p className="text-xs text-muted-foreground">{t.tools}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2 lg:col-span-1">
+          <CardHeader className="pb-2 px-4 pt-4 sm:p-6 sm:pb-2">
+            <CardDescription className="text-xs sm:text-sm">
+              {t.languageDistribution}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center justify-around px-4 pb-4 sm:p-6 sm:pt-0">
+            <div className="text-center">
+              <div
+                className="text-xl sm:text-2xl font-bold"
+                style={{ color: COLORS.en }}
+              >
+                {stats.byLanguage.en}
+              </div>
+              <p className="text-xs text-muted-foreground">{t.englishTools}</p>
+            </div>
+            <div className="text-center">
+              <div
+                className="text-xl sm:text-2xl font-bold"
+                style={{ color: COLORS.vi }}
+              >
+                {stats.byLanguage.vi}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t.vietnameseTools}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
+        {/* Pricing Distribution Bar Chart */}
+        <Card>
+          <CardHeader className="px-4 pt-4 pb-2 sm:p-6 sm:pb-4">
+            <CardTitle className="text-base sm:text-lg">
+              {t.pricingDistribution}
+            </CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              {t.freeTools}: {stats.byPricing.free} • {t.freemiumTools}:{" "}
+              {stats.byPricing.freemium} • {t.paidTools}: {stats.byPricing.paid}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-2 pb-2 sm:px-6 sm:pb-6">
+            <ChartContainer
+              config={chartConfig}
+              className="h-[280px] sm:h-[320px] w-full"
+            >
+              <BarChart
+                data={pricingData}
+                margin={{ top: 5, right: 10, bottom: 5, left: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 11 }}
+                  interval={0}
+                  angle={-15}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis tick={{ fontSize: 11 }} width={35} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                  {pricingData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Language Distribution Pie Chart */}
+        <Card>
+          <CardHeader className="px-4 pt-4 pb-2 sm:p-6 sm:pb-4">
+            <CardTitle className="text-base sm:text-lg">
+              {t.languageDistribution}
+            </CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              {t.englishTools}: {stats.byLanguage.en} • {t.vietnameseTools}:{" "}
+              {stats.byLanguage.vi}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-2 pb-2 sm:px-6 sm:pb-6">
+            <ChartContainer
+              config={chartConfig}
+              className="h-[280px] sm:h-[320px] w-full"
+            >
+              <PieChart>
+                <Pie
+                  data={languageData}
+                  cx="50%"
+                  cy="45%"
+                  labelLine={false}
+                  label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                  outerRadius="60%"
+                  dataKey="value"
+                >
+                  {languageData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent />} />
+              </PieChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

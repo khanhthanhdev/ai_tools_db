@@ -562,6 +562,18 @@ export const getToolStats = query({
       .withIndex("by_isApproved", (q) => q.eq("isApproved", true))
       .collect();
 
+    // Count tools by category
+    const categoryCount: Record<string, number> = {};
+    approvedTools.forEach(tool => {
+      categoryCount[tool.category] = (categoryCount[tool.category] || 0) + 1;
+    });
+
+    // Convert to array format to avoid non-ASCII field name issues
+    const categoryArray = Object.entries(categoryCount).map(([name, count]) => ({
+      name,
+      count,
+    }));
+
     const stats = {
       total: approvedTools.length,
       byPricing: {
@@ -574,6 +586,7 @@ export const getToolStats = query({
         vi: approvedTools.filter(t => t.language === "vi").length,
       },
       categories: [...new Set(approvedTools.map(t => t.category))].length,
+      byCategory: categoryArray,
     };
 
     return stats;

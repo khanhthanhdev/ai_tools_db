@@ -73,7 +73,7 @@ export default function App() {
                 <Suspense
                   fallback={<div className="py-10 text-center">Loading...</div>}
                 >
-                  <AboutUsPage />
+                  <AboutUsPage language={language} />
                 </Suspense>
               }
             />

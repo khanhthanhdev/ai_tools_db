@@ -1,4 +1,4 @@
-import { useState, ReactElement } from "react";
+import { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
-import { LanguageToggle } from "../components/LanguageToggle";
 import BeamsBackground from "../components/kokonutui/beams-background";
 import SocialButton, {
   SocialIcons,
@@ -59,7 +58,10 @@ type Translation = {
   secondaryCta: string;
 };
 
-const socialLabelMap: Record<Language, Record<MemberLinkType, (name: string) => string>> = {
+const socialLabelMap: Record<
+  Language,
+  Record<MemberLinkType, (name: string) => string>
+> = {
   en: {
     twitter: (name) => `Follow ${name} on Twitter`,
     instagram: (name) => `Follow ${name} on Instagram`,
@@ -81,16 +83,16 @@ const socialLabelMap: Record<Language, Record<MemberLinkType, (name: string) => 
 const translations: Record<Language, Translation> = {
   en: {
     pageBadge: "Our Story",
-    heroTitle: "Helping makers discover the right AI tools faster",
+    heroTitle: "AI Knowledge Cloud for Vietnam",
     heroSubtitle:
-      "AI Tools Database is a curated directory built for product teams, researchers, and indie hackers who want a trustworthy signal in a sea of hype.",
+      "A curated AI tools directory built for students, researchers, and innovators. Browse, share, and discover AI tools with semantic search to accelerate AI adoption in Vietnam.",
     missionTitle: "Why we built it",
     missionDescription:
-      "We believe great ideas deserve great tools. Our mission is to surface the most helpful AI products, document real-world use cases, and connect builders with the resources they need to ship.",
+      "We believe AI should be accessible to everyone. Our mission is to create a knowledge hub where the Vietnamese community can discover, share, and learn about AI tools that drive innovation and research.",
     missionHighlights: [
-      "Curated submissions reviewed for quality and relevance",
-      "Multilingual coverage to support global creators",
-      "Actionable metadata like pricing, categories, and launch readiness",
+      "Semantic search powered by vector embeddings for intelligent discovery",
+      "Community-driven submissions from students and researchers",
+      "Bilingual support (English/Vietnamese) for local accessibility",
     ],
     focusTitle: "What we focus on",
     focusCards: [
@@ -113,71 +115,73 @@ const translations: Record<Language, Translation> = {
           "Filter by pricing, category, or launch status to assemble the perfect stack for your next experiment.",
       },
     ],
-    teamTitle: "Meet the humans behind the database",
+    teamTitle: "Meet the team",
     teamDescription:
-      "We are a small distributed crew of AI enthusiasts, designers, and founders. We ship fast, listen to feedback, and keep the catalog fresh.",
+      "A collaboration between Vin University Library and CECS students passionate about making AI accessible to the Vietnamese community.",
     teamMembers: [
       {
-        name: "Thanh Nguyen",
-        role: "Product & Partnerships",
-        bio: "Keeps the roadmap focused on builders and maintains community curation standards.",
-        location: "Ho Chi Minh City, Vietnam",
-        focus: "Builder advocacy",
-        image: "https://avatar.vercel.sh/thanh?text=TN",
-        initials: "TN",
-        links: [
-          { type: "linkedin", url: "https://www.linkedin.com/in/thanhkt" },
-          { type: "twitter", url: "https://twitter.com/thanhkt" },
-          { type: "email", url: "mailto:hello@aitools.dev" },
-        ],
-      },
-      {
-        name: "Linh Pham",
-        role: "Design Systems",
-        bio: "Crafts the interface patterns, motion, and accessibility that make browsing tools feel effortless.",
-        location: "Da Nang, Vietnam",
-        focus: "Design ops",
-        image: "https://avatar.vercel.sh/linh?text=LP",
-        initials: "LP",
-        links: [
-          { type: "linkedin", url: "https://www.linkedin.com/in/linh-pham" },
-          { type: "instagram", url: "https://www.instagram.com/linh.design" },
-          { type: "email", url: "mailto:linh@aitools.dev" },
-        ],
-      },
-      {
-        name: "Minh Tran",
-        role: "Data & Research",
-        bio: "Tracks emerging AI launches and keeps metadata accurate across pricing, categories, and use cases.",
+        name: "Tony Tin",
+        role: "Director of Vin University Library",
+        bio: "Provides strategic direction and ensures the platform aligns with academic research and knowledge sharing goals.",
         location: "Hanoi, Vietnam",
-        focus: "AI research",
-        image: "https://avatar.vercel.sh/minh?text=MT",
-        initials: "MT",
+        focus: "Project Manager",
+        image: "https://avatar.vercel.sh/tonytin?text=TT",
+        initials: "TT",
         links: [
-          { type: "linkedin", url: "https://www.linkedin.com/in/minh-tran-ai" },
-          { type: "website", url: "https://minhtran.ai" },
-          { type: "email", url: "mailto:minh@aitools.dev" },
+          { type: "email", url: "mailto:tony.tin@vinuni.edu.vn" },
+          { type: "website", url: "https://vinuni.edu.vn/library" },
+          { type: "linkedin", url: "https://www.linkedin.com/in/tonytin/" },
         ],
+      },
+      {
+        name: "Thanh Tran",
+        role: "CECS Student - Technical Lead",
+        bio: "Leads development, architecture design, and coding. Manages the roadmap and coordinates the team.",
+        location: "Hanoi, Vietnam",
+        focus: "Software Engineer",
+        image: "https://avatar.vercel.sh/thanhtran?text=TT",
+        initials: "TT",
+        links: [
+          {
+            type: "linkedin",
+            url: "https://www.linkedin.com/in/khanhthanhdev",
+          },
+          { type: "email", url: "mailto:25thanh.tk@vinuni.edu.vn" },
+          {
+            type: "website",
+            url: "https://www.khanhthanhdev.me/",
+          },
+        ],
+      },
+      {
+        name: "Han Nguyen",
+        role: "CECS Student - UI/UX Designer",
+        bio: "Designs the user experience, interface patterns, and visual identity that make discovering AI tools intuitive and delightful.",
+        location: "Hanoi, Vietnam",
+        focus: "Product Design",
+        image: "https://avatar.vercel.sh/hannguyen?text=HN",
+        initials: "HN",
+        links: [{ type: "email", url: "mailto:han.n@vinuni.edu.vn" }],
       },
     ],
-    calloutTitle: "Want to get involved?",
+    calloutTitle: "Want to contribute?",
     calloutDescription:
-      "Share your favorite tool, suggest an improvement, or join the community shaping the next generation of AI workflows.",
+      "Share your favorite AI tool, suggest improvements, or join us in building Vietnam's premier AI knowledge hub.",
     primaryCta: "Browse the tools",
     secondaryCta: "Submit a tool",
   },
   vi: {
     pageBadge: "Câu chuyện của chúng tôi",
-    heroTitle: "Giúp bạn tìm đúng công cụ AI nhanh hơn",
+    heroTitle: "Đám Mây Tri Thức AI cho Việt Nam",
     heroSubtitle:
-      "AI Tools Database là thư mục được tuyển chọn dành cho đội ngũ sản phẩm, nhà nghiên cứu và indie hacker cần những gợi ý đáng tin cậy giữa biển thông tin.",
+      "Thư mục công cụ AI được tuyển chọn dành cho sinh viên, nhà nghiên cứu và người đổi mới. Khám phá, chia sẻ công cụ AI với tìm kiếm ngữ nghĩa để thúc đẩy AI tại Việt Nam.",
     missionTitle: "Vì sao chúng tôi xây dựng",
     missionDescription:
-      "Chúng tôi tin rằng ý tưởng tốt xứng đáng có công cụ tốt. Sứ mệnh của chúng tôi là giới thiệu những sản phẩm AI hữu ích nhất, ghi lại trường hợp sử dụng thực tế và kết nối người làm sản phẩm với nguồn lực phù hợp.",
+      "Chúng tôi tin rằng AI nên dễ tiếp cận với mọi người. Sứ mệnh của chúng tôi là tạo ra trung tâm tri thức nơi cộng đồng Việt Nam có thể khám phá, chia sẻ và học hỏi về các công cụ AI thúc đẩy đổi mới và nghiên cứu.",
     missionHighlights: [
-      "Bài gửi được tuyển chọn kỹ lưỡng về chất lượng và mức độ phù hợp",
-      "Hỗ trợ đa ngôn ngữ để phục vụ cộng đồng sáng tạo toàn cầu",
-      "Thông tin chi tiết như giá, danh mục và trạng thái ra mắt rõ ràng",
+      "Tìm kiếm ngữ nghĩa được hỗ trợ bởi vector embeddings",
+      "Nội dung do cộng đồng sinh viên và nhà nghiên cứu đóng góp",
+      "Hỗ trợ song ngữ (Tiếng Anh/Tiếng Việt) cho khả năng tiếp cận địa phương",
     ],
     focusTitle: "Trọng tâm của chúng tôi",
     focusCards: [
@@ -200,69 +204,75 @@ const translations: Record<Language, Translation> = {
           "Lọc theo giá, danh mục hoặc trạng thái ra mắt để xây dựng bộ công cụ hoàn hảo cho dự án tiếp theo.",
       },
     ],
-    teamTitle: "Những con người đứng sau",
+    teamTitle: "Đội ngũ của chúng tôi",
     teamDescription:
-      "Chúng tôi là một nhóm nhỏ đam mê AI, thiết kế và khởi nghiệp. Chúng tôi lắng nghe phản hồi và luôn cập nhật thư viện.",
+      "Sự hợp tác giữa Thư viện Đại học Vin và sinh viên CECS đam mê làm cho AI dễ tiếp cận với cộng đồng Việt Nam.",
     teamMembers: [
       {
-        name: "Thanh Nguyen",
-        role: "Sản phẩm & Đối tác",
-        bio: "Định hình lộ trình sản phẩm dựa trên nhu cầu builder và đảm bảo tiêu chuẩn tuyển chọn cộng đồng.",
-        location: "TP. Hồ Chí Minh, Việt Nam",
-        focus: "Kết nối cộng đồng",
-        image: "https://avatar.vercel.sh/thanh?text=TN",
-        initials: "TN",
-        links: [
-          { type: "linkedin", url: "https://www.linkedin.com/in/thanhkt" },
-          { type: "twitter", url: "https://twitter.com/thanhkt" },
-          { type: "email", url: "mailto:hello@aitools.dev" },
-        ],
-      },
-      {
-        name: "Linh Pham",
-        role: "Hệ thống thiết kế",
-        bio: "Thiết kế trải nghiệm, chuyển động và khả năng truy cập giúp việc khám phá công cụ trở nên mượt mà.",
-        location: "Đà Nẵng, Việt Nam",
-        focus: "Quy trình thiết kế",
-        image: "https://avatar.vercel.sh/linh?text=LP",
-        initials: "LP",
-        links: [
-          { type: "linkedin", url: "https://www.linkedin.com/in/linh-pham" },
-          { type: "instagram", url: "https://www.instagram.com/linh.design" },
-          { type: "email", url: "mailto:linh@aitools.dev" },
-        ],
-      },
-      {
-        name: "Minh Tran",
-        role: "Dữ liệu & Nghiên cứu",
-        bio: "Theo dõi các sản phẩm AI mới nhất và cập nhật dữ liệu về giá, danh mục cùng tình trạng ra mắt.",
+        name: "Tony Tin",
+        role: "Giám đốc Thư viện Đại học Vin",
+        bio: "Cung cấp định hướng chiến lược và đảm bảo nền tảng phù hợp với mục tiêu nghiên cứu học thuật và chia sẻ tri thức.",
         location: "Hà Nội, Việt Nam",
-        focus: "Nghiên cứu AI",
-        image: "https://avatar.vercel.sh/minh?text=MT",
-        initials: "MT",
+        focus: "Quản lí dự án",
+        image: "https://avatar.vercel.sh/tonytin?text=TT",
+        initials: "TT",
         links: [
-          { type: "linkedin", url: "https://www.linkedin.com/in/minh-tran-ai" },
-          { type: "website", url: "https://minhtran.ai" },
-          { type: "email", url: "mailto:minh@aitools.dev" },
+          { type: "email", url: "mailto:tony.tin@vinuni.edu.vn" },
+          { type: "website", url: "https://vinuni.edu.vn/library" },
+          { type: "linkedin", url: "https://www.linkedin.com/in/tonytin/" },
         ],
+      },
+      {
+        name: "Thanh Tran",
+        role: "Sinh viên CECS - Phụ trách kĩ thuật",
+        bio: "Dẫn dắt phát triển, thiết kế kiến trúc và triển khai kỹ thuật. Quản lý lộ trình và điều phối nhóm.",
+        location: "Hà Nội, Việt Nam",
+        focus: "Kĩ sư phần mềm",
+        image: "https://avatar.vercel.sh/thanhtran?text=TT",
+        initials: "TT",
+        links: [
+          {
+            type: "linkedin",
+            url: "https://www.linkedin.com/in/khanhthanhdev",
+          },
+          { type: "email", url: "mailto:25thanh.tk@vinuni.edu.vn" },
+          {
+            type: "website",
+            url: "https://www.khanhthanhdev.me/",
+          },
+        ],
+      },
+      {
+        name: "Han Nguyen",
+        role: "Sinh viên CECS - Thiết kế UI/UX",
+        bio: "Thiết kế trải nghiệm người dùng, giao diện và bản sắc thị giác giúp việc khám phá công cụ AI trở nên trực quan và thú vị.",
+        location: "Hà Nội, Việt Nam",
+        focus: "Thiết kế sản phẩm",
+        image: "https://avatar.vercel.sh/hannguyen?text=HN",
+        initials: "HN",
+        links: [{ type: "email", url: "mailto:han.n@vinuni.edu.vn" }],
       },
     ],
-    calloutTitle: "Muốn tham gia cùng chúng tôi?",
+    calloutTitle: "Muốn đóng góp?",
     calloutDescription:
-      "Chia sẻ công cụ yêu thích, gợi ý cải tiến hoặc tham gia cộng đồng xây dựng quy trình AI tương lai.",
+      "Chia sẻ công cụ AI yêu thích, đề xuất cải tiến, hoặc tham gia xây dựng trung tâm tri thức AI hàng đầu của Việt Nam.",
     primaryCta: "Khám phá công cụ",
     secondaryCta: "Gửi công cụ",
   },
 };
 
-export function AboutUsPage() {
-  const [language, setLanguage] = useState<Language>("en");
+type AboutUsPageProps = {
+  language?: Language;
+};
+
+export function AboutUsPage({ language = "en" }: AboutUsPageProps) {
   const t = translations[language];
 
   const buildSocialOptions = (member: TeamMember): SocialOption[] =>
     member.links.map((link) => {
       const icon = SocialIcons[link.type] ?? SocialIcons.default;
-      const labelBuilder = socialLabelMap[language][link.type] ?? socialLabelMap[language].default;
+      const labelBuilder =
+        socialLabelMap[language][link.type] ?? socialLabelMap[language].default;
       return {
         icon,
         label: labelBuilder(member.name),
@@ -275,173 +285,198 @@ export function AboutUsPage() {
   return (
     <>
       <SEO
-        title={language === "vi" ? "Về Chúng Tôi - Trần Khánh Thành" : "About Us - Tran Khanh Thanh"}
-        description={language === "vi" 
-          ? "Tìm hiểu về Trần Khánh Thành (khanhthanhdev), người sáng lập AI Tools Database. Đám mây tri thức AI được tuyển chọn cho Thư viện Vin Uni."
-          : "Learn about Tran Khanh Thanh (khanhthanhdev), founder of AI Tools Database. AI Knowledge Cloud curated for Vin Uni Library."}
-        keywords={language === "vi"
-          ? ["Trần Khánh Thành", "khanhthanhdev", "thanhtran", "Thư viện Vin Uni", "đám mây tri thức AI", "đề xuất công cụ AI"]
-          : ["Tran Khanh Thanh", "khanhthanhdev", "thanhtran", "Vin Uni Library", "AI knowledge cloud", "AI tool recommendation"]}
+        title={
+          language === "vi"
+            ? "Về Chúng Tôi - Trần Khánh Thành"
+            : "About Us - Tran Khanh Thanh"
+        }
+        description={
+          language === "vi"
+            ? "Tìm hiểu về Trần Khánh Thành (khanhthanhdev), người sáng lập AI Tools Database. Đám mây tri thức AI được tuyển chọn cho Thư viện Vin Uni."
+            : "Learn about Tran Khanh Thanh (khanhthanhdev), founder of AI Tools Database. AI Knowledge Cloud curated for Vin Uni Library."
+        }
+        keywords={
+          language === "vi"
+            ? [
+                "Trần Khánh Thành",
+                "khanhthanhdev",
+                "thanhtran",
+                "Thư viện Vin Uni",
+                "đám mây tri thức AI",
+                "đề xuất công cụ AI",
+              ]
+            : [
+                "Tran Khanh Thanh",
+                "khanhthanhdev",
+                "thanhtran",
+                "Vin Uni Library",
+                "AI knowledge cloud",
+                "AI tool recommendation",
+              ]
+        }
         language={language}
         structuredData={organizationData}
       />
       <div className="relative min-h-screen">
-      <div className="fixed inset-0 -z-10">
-        <BeamsBackground intensity="subtle" className="h-full w-full" />
-      </div>
-
-      {/* <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
-          <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center gap-2 text-sm font-semibold sm:text-base">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                <Sparkles className="h-5 w-5" />
-              </span>
-              <span>AI Tools Database</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/">{language === "en" ? "Home" : "Trang chủ"}</Link>
-            </Button>
-            <LanguageToggle language={language} onLanguageChange={setLanguage} />
-          </div>
+        <div className="fixed inset-0 -z-10">
+          <BeamsBackground intensity="subtle" className="h-full w-full" />
         </div>
-      </header> */}
 
-      <main className="container mx-auto flex max-w-6xl flex-col gap-16 px-4 py-12 sm:px-6 sm:py-16">
-        <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-          <Badge variant="secondary" className="rounded-full px-4 py-1 text-xs sm:text-sm">
-            {t.pageBadge}
-          </Badge>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-            {t.heroTitle}
-          </h1>
-          <p className="text-base text-muted-foreground sm:text-lg">
-            {t.heroSubtitle}
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link to="/">{t.primaryCta}</Link>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <Link to="/">{t.secondaryCta}</Link>
-            </Button>
-          </div>
-        </section>
+        <main className="container mx-auto flex max-w-6xl flex-col gap-16 px-4 py-12 sm:px-6 sm:py-16">
+          <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
+            <Badge
+              variant="secondary"
+              className="rounded-full px-4 py-1 text-xs sm:text-sm"
+            >
+              {t.pageBadge}
+            </Badge>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+              {t.heroTitle}
+            </h1>
+            <p className="text-base text-muted-foreground sm:text-lg">
+              {t.heroSubtitle}
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <Link to="/">{t.primaryCta}</Link>
+              </Button>
+              <Button asChild size="lg" variant="secondary">
+                <Link to="/">{t.secondaryCta}</Link>
+              </Button>
+            </div>
+          </section>
 
-        <section className="grid gap-8 lg:grid-cols-2">
-          <Card className="border-primary/10 bg-background/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <Sparkles className="h-6 w-6 text-primary" />
-                {t.missionTitle}
-              </CardTitle>
-              <CardDescription>{t.missionDescription}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {t.missionHighlights.map((highlight) => (
-                <div key={highlight} className="flex items-start gap-3 text-sm sm:text-base">
-                  <span className="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-primary" />
-                  <span>{highlight}</span>
-                </div>
+          <section className="grid gap-8 lg:grid-cols-2">
+            <Card className="border-primary/10 bg-background/80 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                  {t.missionTitle}
+                </CardTitle>
+                <CardDescription>{t.missionDescription}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {t.missionHighlights.map((highlight) => (
+                  <div
+                    key={highlight}
+                    className="flex items-start gap-3 text-sm sm:text-base"
+                  >
+                    <span className="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-primary" />
+                    <span>{highlight}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/10 bg-background/80 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl">{t.focusTitle}</CardTitle>
+                <CardDescription>
+                  {language === "en"
+                    ? "These pillars keep the database opinionated and useful."
+                    : "Những trọng tâm giúp thư viện luôn hữu ích."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {t.focusCards.map((card) => (
+                  <div
+                    key={card.title}
+                    className="flex gap-4 rounded-lg bg-muted/40 p-4"
+                  >
+                    <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-background">
+                      {card.icon}
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-semibold">{card.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {card.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="mx-auto max-w-4xl space-y-6 text-center">
+            <div className="space-y-3">
+              <h2 className="text-2xl font-semibold sm:text-3xl">
+                {t.teamTitle}
+              </h2>
+              <p className="text-sm text-muted-foreground sm:text-base">
+                {t.teamDescription}
+              </p>
+            </div>
+            <Separator className="bg-primary/30" />
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {t.teamMembers.map((member) => (
+                <Card
+                  key={member.name}
+                  className="flex h-full flex-col bg-background/80 shadow-sm"
+                >
+                  <CardHeader className="flex flex-col items-center space-y-4 text-center">
+                    <Avatar className="h-20 w-20 border border-primary/40 shadow-sm">
+                      <AvatarImage src={member.image} alt={member.name} />
+                      <AvatarFallback>{member.initials}</AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-1">
+                      <CardTitle className="text-xl">{member.name}</CardTitle>
+                      <CardDescription className="font-medium text-primary">
+                        {member.role}
+                      </CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 space-y-4 text-sm text-muted-foreground">
+                    <p>{member.bio}</p>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs">
+                        <MapPin className="h-3.5 w-3.5 text-primary/80" />
+                        <span className="text-muted-foreground">
+                          {member.location}
+                        </span>
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className="border-dashed px-2 py-1 text-[0.7rem] uppercase tracking-wide"
+                      >
+                        {member.focus}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="mt-auto flex justify-center pb-6 pt-0">
+                    <SocialButton
+                      label={language === "en" ? "Connect" : "Kết nối"}
+                      interaction="click"
+                      options={buildSocialOptions(member)}
+                      className="w-full justify-center border-2 border-primary bg-white !text-primary shadow-sm hover:bg-primary hover:!text-primary-foreground sm:w-auto"
+                    />
+                  </CardFooter>
+                </Card>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </section>
 
-          <Card className="border-primary/10 bg-background/80 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-2xl">{t.focusTitle}</CardTitle>
-              <CardDescription>
-                {language === "en"
-                  ? "These pillars keep the database opinionated and useful."
-                  : "Những trọng tâm giúp thư viện luôn hữu ích."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {t.focusCards.map((card) => (
-                <div key={card.title} className="flex gap-4 rounded-lg bg-muted/40 p-4">
-                  <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full bg-background">
-                    {card.icon}
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold">{card.title}</h3>
-                    <p className="text-sm text-muted-foreground">{card.description}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </section>
-
-        <section className="mx-auto max-w-4xl space-y-6 text-center">
-          <div className="space-y-3">
-            <h2 className="text-2xl font-semibold sm:text-3xl">{t.teamTitle}</h2>
-            <p className="text-sm text-muted-foreground sm:text-base">{t.teamDescription}</p>
-          </div>
-          <Separator className="bg-primary/30" />
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {t.teamMembers.map((member) => (
-              <Card
-                key={member.name}
-                className="flex h-full flex-col bg-background/80 shadow-sm"
-              >
-                <CardHeader className="flex flex-col items-center space-y-4 text-center">
-                  <Avatar className="h-20 w-20 border border-primary/40 shadow-sm">
-                    <AvatarImage src={member.image} alt={member.name} />
-                    <AvatarFallback>{member.initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-1">
-                    <CardTitle className="text-xl">{member.name}</CardTitle>
-                    <CardDescription className="font-medium text-primary">
-                      {member.role}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 space-y-4 text-sm text-muted-foreground">
-                  <p>{member.bio}</p>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <span className="inline-flex items-center gap-1 text-xs">
-                      <MapPin className="h-3.5 w-3.5 text-primary/80" />
-                      <span className="text-muted-foreground">{member.location}</span>
-                    </span>
-                    <Badge variant="outline" className="border-dashed px-2 py-1 text-[0.7rem] uppercase tracking-wide">
-                      {member.focus}
-                    </Badge>
-                  </div>
-                </CardContent>
-                <CardFooter className="mt-auto flex justify-center pb-6 pt-0">
-                  <SocialButton
-                    label={language === "en" ? "Connect" : "Kết nối"}
-                    interaction="click"
-                    options={buildSocialOptions(member)}
-                    className="w-full justify-center sm:w-auto"
-                  />
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-3xl rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center shadow-sm">
-          <div className="flex justify-center pb-4">
-            <Rocket className="h-10 w-10 text-primary" />
-          </div>
-          <h2 className="text-2xl font-semibold sm:text-3xl">{t.calloutTitle}</h2>
-          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-            {t.calloutDescription}
-          </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button asChild size="lg">
-              <Link to="/">{t.primaryCta}</Link>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <Link to="/">{t.secondaryCta}</Link>
-            </Button>
-          </div>
-        </section>
-      </main>
-    </div>
+          <section className="mx-auto max-w-3xl rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center shadow-sm">
+            <div className="flex justify-center pb-4">
+              <Rocket className="h-10 w-10 text-primary" />
+            </div>
+            <h2 className="text-2xl font-semibold sm:text-3xl">
+              {t.calloutTitle}
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+              {t.calloutDescription}
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button asChild size="lg">
+                <Link to="/">{t.primaryCta}</Link>
+              </Button>
+              <Button asChild size="lg" variant="secondary">
+                <Link to="/add-tool">{t.secondaryCta}</Link>
+              </Button>
+            </div>
+          </section>
+        </main>
+      </div>
     </>
   );
 }
