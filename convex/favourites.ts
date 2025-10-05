@@ -83,3 +83,20 @@ export const getUserFavourites = query({
     }
   },
 });
+
+// Batch query to get all favourite tool IDs for the current user
+export const getUserFavouriteIds = query({
+  handler: async (ctx): Promise<Id<"aiTools">[]> => {
+    try {
+      const user = await getUser(ctx);
+      const favourites = await ctx.db
+        .query("favourites")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .collect();
+
+      return favourites.map((f) => f.toolId);
+    } catch (error) {
+      return [];
+    }
+  },
+});

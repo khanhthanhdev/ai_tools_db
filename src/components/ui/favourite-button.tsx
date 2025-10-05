@@ -9,11 +9,17 @@ import { cn } from "@/lib/utils";
 interface FavouriteButtonProps {
   toolId: Id<"aiTools">;
   className?: string;
+  isFavourited?: boolean;
 }
 
-export function FavouriteButton({ toolId, className }: FavouriteButtonProps) {
+export function FavouriteButton({ toolId, className, isFavourited: isFavouritedProp }: FavouriteButtonProps) {
   const user = useQuery(api.auth.loggedInUser);
-  const isFavourited = useQuery(api.favourites.isFavourited, { toolId });
+  // Only query if not provided as prop (for backwards compatibility)
+  const isFavouritedQuery = useQuery(
+    api.favourites.isFavourited, 
+    isFavouritedProp === undefined ? { toolId } : "skip"
+  );
+  const isFavourited = isFavouritedProp ?? isFavouritedQuery;
   const toggleFavourite = useMutation(api.favourites.toggleFavourite);
 
   const handleFavouriteClick = async (e: React.MouseEvent) => {

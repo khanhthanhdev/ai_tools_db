@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useAction } from "convex/react";
+import { useState, useMemo } from "react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Doc } from "../../convex/_generated/dataModel";
 import { Input } from "@/components/ui/input";
@@ -96,6 +96,13 @@ export function SemanticSearchBar({
 
   const semanticSearch = useAction(api.actions.semanticSearch);
   const hybridSearch = useAction(api.actions.hybridSearch);
+
+  // Batch fetch all favourite IDs once
+  const favouriteIds = useQuery(api.favourites.getUserFavouriteIds);
+  const favouriteIdsSet = useMemo(
+    () => new Set(favouriteIds || []),
+    [favouriteIds]
+  );
 
   const t = translations[language];
 
@@ -363,7 +370,11 @@ export function SemanticSearchBar({
                       </Badge>
                     </div>
                   )}
-                  <ToolCard tool={tool} language={language} />
+                  <ToolCard 
+                    tool={tool} 
+                    language={language}
+                    isFavourited={favouriteIdsSet.has(tool._id)}
+                  />
                 </motion.div>
               ))}
             </div>

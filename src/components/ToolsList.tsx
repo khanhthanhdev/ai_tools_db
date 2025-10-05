@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import { Doc } from "../../convex/_generated/dataModel";
+import { Doc, Id } from "../../convex/_generated/dataModel";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
@@ -37,7 +37,7 @@ export function ToolsList({
   const [loadedPages, setLoadedPages] = useState(1); // For infinite scroll
   const ITEMS_PER_PAGE_MOBILE = 6;
   const ITEMS_PER_PAGE_DESKTOP = 12;
-  const INITIAL_LOAD = 12; // Load fewer items initially for faster first paint
+  const INITIAL_LOAD = 8; // Load fewer items initially for faster first paint
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -79,6 +79,13 @@ export function ToolsList({
           pricing: selectedPricing as any || undefined,
         }
       : "skip"
+  );
+
+  // Batch fetch all favourite IDs once instead of per-tool
+  const favouriteIds = useQuery(api.favourites.getUserFavouriteIds);
+  const favouriteIdsSet = useMemo(
+    () => new Set(favouriteIds || []),
+    [favouriteIds]
   );
 
   // Use semantic results if provided, otherwise use keyword search or browse results
@@ -260,7 +267,7 @@ export function ToolsList({
             visible: {
               opacity: 1,
               transition: {
-                staggerChildren: 0.05
+                staggerChildren: 0.02
               }
             }
           }}
@@ -275,8 +282,8 @@ export function ToolsList({
                   opacity: 1, 
                   y: 0,
                   transition: {
-                    duration: 0.4,
-                    ease: [0.16, 1, 0.3, 1]
+                    duration: 0.25,
+                    ease: "easeOut"
                   }
                 }
               }}
@@ -285,6 +292,7 @@ export function ToolsList({
                 tool={tool} 
                 language={language}
                 showScore={isSemanticSearch && '_score' in tool}
+                isFavourited={favouriteIdsSet.has(tool._id)}
                 config={{ 
                   size: 'compact', 
                   layout: 'vertical' 
@@ -348,6 +356,7 @@ export function ToolsList({
           categoryIndex={categoryIndex}
           language={language}
           isSemanticSearch={isSemanticSearch}
+          favouriteIdsSet={favouriteIdsSet}
         />
       ))}
 
@@ -368,12 +377,14 @@ function CategorySection({
   categoryIndex,
   language,
   isSemanticSearch,
+  favouriteIdsSet,
 }: {
   category: string;
   tools: ToolWithScore[];
   categoryIndex: number;
   language: "en" | "vi";
   isSemanticSearch: boolean;
+  favouriteIdsSet: Set<Id<"aiTools">>;
 }) {
   const { ref, isVisible } = useScrollAnimation({
     threshold: 0.1,
@@ -408,7 +419,7 @@ function CategorySection({
             visible: {
               opacity: 1,
               transition: {
-                staggerChildren: 0.03, // Reduced for faster animation
+                staggerChildren: 0.01, // Reduced for faster animation
               },
             },
           }}
@@ -423,8 +434,8 @@ function CategorySection({
                   opacity: 1,
                   y: 0,
                   transition: {
-                    duration: 0.3, // Faster animation
-                    ease: [0.16, 1, 0.3, 1],
+                    duration: 0.2, // Faster animation
+                    ease: "easeOut",
                   },
                 },
               }}
@@ -433,6 +444,7 @@ function CategorySection({
                 tool={tool}
                 language={language}
                 showScore={isSemanticSearch && "_score" in tool}
+                isFavourited={favouriteIdsSet?.has(tool._id)}
                 config={{
                   size: "compact",
                   layout: "vertical",

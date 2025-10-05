@@ -118,7 +118,12 @@ export function FavouritesPage({ language }: { language: Language }) {
           ) : (
             <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {favouriteTools.map((tool) => (
-                <ToolCard key={tool._id} tool={tool} language={language} />
+                <ToolCard 
+                  key={tool._id} 
+                  tool={tool} 
+                  language={language}
+                  isFavourited={true}
+                />
               ))}
             </div>
           )}

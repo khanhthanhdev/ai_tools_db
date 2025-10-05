@@ -26,6 +26,7 @@ interface ToolCardProps {
   tool: ToolWithScore;
   language: "en" | "vi";
   showScore?: boolean;
+  isFavourited?: boolean;
   config?: {
     size?: "compact" | "default";
     layout?: "vertical" | "horizontal";
@@ -66,7 +67,7 @@ const pricingVariants = {
   },
 } as const;
 
-export function ToolCard({ tool, language, showScore = false }: ToolCardProps) {
+export function ToolCard({ tool, language, showScore = false, isFavourited }: ToolCardProps) {
   const pricingStyle = pricingVariants[tool.pricing];
   const description = tool.description;
   const averageRating = tool.averageRating ?? 0;
@@ -156,7 +157,7 @@ export function ToolCard({ tool, language, showScore = false }: ToolCardProps) {
             <CardTitle className="flex-1 text-base sm:text-lg font-bold leading-tight line-clamp-2 transition-colors duration-300 group-hover/card:text-primary">
               {tool.name}
             </CardTitle>
-            <FavouriteButton toolId={tool._id} />
+            <FavouriteButton toolId={tool._id} isFavourited={isFavourited} />
           </div>
 
           {/* Badges row */}
