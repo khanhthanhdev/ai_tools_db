@@ -3,13 +3,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Layout } from "./components/Layout";
 import { BrowsePage } from "./pages/BrowsePage";
-
+import { Analytics } from "@vercel/analytics/react";
 const AddToolPage = lazy(() =>
-  import("./pages/AddToolPage").then((module) => ({ default: module.AddToolPage }))
+  import("./pages/AddToolPage").then((module) => ({
+    default: module.AddToolPage,
+  }))
 );
 
 const FavouritesPage = lazy(() =>
-  import("./pages/FavouritesPage").then((module) => ({ default: module.FavouritesPage }))
+  import("./pages/FavouritesPage").then((module) => ({
+    default: module.FavouritesPage,
+  }))
 );
 
 const StatsPage = lazy(() =>
@@ -17,7 +21,9 @@ const StatsPage = lazy(() =>
 );
 
 const AboutUsPage = lazy(() =>
-  import("./pages/AboutUsPage").then((module) => ({ default: module.AboutUsPage }))
+  import("./pages/AboutUsPage").then((module) => ({
+    default: module.AboutUsPage,
+  }))
 );
 
 type Language = "en" | "vi";
@@ -34,7 +40,9 @@ export default function App() {
             <Route
               path="/add-tool"
               element={
-                <Suspense fallback={<div className="py-10 text-center">Loading...</div>}>
+                <Suspense
+                  fallback={<div className="py-10 text-center">Loading...</div>}
+                >
                   <AddToolPage language={language} />
                 </Suspense>
               }
@@ -42,7 +50,9 @@ export default function App() {
             <Route
               path="/favourites"
               element={
-                <Suspense fallback={<div className="py-10 text-center">Loading...</div>}>
+                <Suspense
+                  fallback={<div className="py-10 text-center">Loading...</div>}
+                >
                   <FavouritesPage language={language} />
                 </Suspense>
               }
@@ -50,7 +60,9 @@ export default function App() {
             <Route
               path="/stats"
               element={
-                <Suspense fallback={<div className="py-10 text-center">Loading...</div>}>
+                <Suspense
+                  fallback={<div className="py-10 text-center">Loading...</div>}
+                >
                   <StatsPage language={language} />
                 </Suspense>
               }
@@ -58,7 +70,9 @@ export default function App() {
             <Route
               path="/about-us"
               element={
-                <Suspense fallback={<div className="py-10 text-center">Loading...</div>}>
+                <Suspense
+                  fallback={<div className="py-10 text-center">Loading...</div>}
+                >
                   <AboutUsPage />
                 </Suspense>
               }
@@ -66,6 +80,7 @@ export default function App() {
           </Routes>
         </Layout>
       </BrowserRouter>
+      <Analytics />
     </HelmetProvider>
   );
 }
