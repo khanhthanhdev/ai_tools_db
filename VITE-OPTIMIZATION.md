@@ -11,16 +11,14 @@
 - Pre-transforms critical files on server start
 - Includes main entry points and frequently accessed pages
 
-### 3. Improved Code Splitting Strategy
-- Consolidated related libraries into logical chunks
-- **CRITICAL**: React + Radix UI bundled together to prevent forwardRef errors
-- Reduced number of chunks to 6 optimized chunks:
-  - `react-vendor`: React + ReactDOM + Radix UI + React Hook Form + Sonner (must stay together)
-  - `router`: React Router
-  - `motion`: Animation library
-  - `convex`: Backend SDK
-  - `charts`: Recharts + D3
-  - `vendor`: Everything else (icons, utilities, etc.)
+### 3. Smart Code Splitting Strategy
+- **Conservative approach**: Only manually split truly independent large libraries
+- Let Vite's automatic chunking handle interdependent libraries (React, Radix UI, etc.)
+- This prevents circular dependency and initialization order issues
+- Manual chunks for:
+  - `charts`: Recharts + D3 (large, often lazy loaded)
+  - `motion`: Animation library (large, can be deferred)
+- Automatic chunks for everything else (React ecosystem, utilities, etc.)
 
 ### 4. Build Optimizations
 - Target ES2020 for smaller bundles

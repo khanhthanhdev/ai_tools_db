@@ -132,7 +132,7 @@ window.addEventListener('message', async (message) => {
       // Optimize tree-shaking
       treeshake: {
         preset: "recommended",
-        moduleSideEffects: false,
+        moduleSideEffects: "no-external",
       },
 
       output: {
@@ -141,49 +141,25 @@ window.addEventListener('message', async (message) => {
         entryFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
 
-        // Simplified manual chunks strategy to avoid React duplication issues
+        // Conservative manual chunks - only split truly independent large libraries
         manualChunks(id) {
-          // Don't split app code
           if (!id.includes("node_modules")) {
             return undefined;
           }
 
-          // Group 1: React ecosystem (MUST stay together)
-          // This includes React, ReactDOM, and all React-dependent UI libraries
-          if (
-            id.includes("/react/") || 
-            id.includes("/react-dom/") || 
-            id.includes("/react-is/") ||
-            id.includes("/scheduler/") ||
-            id.includes("/@radix-ui/") ||
-            id.includes("/react-hook-form/") ||
-            id.includes("/sonner/")
-          ) {
-            return "react-vendor";
-          }
-
-          // Group 2: React Router (separate for code splitting)
-          if (id.includes("/react-router")) {
-            return "router";
-          }
-
-          // Group 3: Motion/animations (large, can be lazy loaded)
-          if (id.includes("/motion/") || id.includes("/framer-motion/")) {
-            return "motion";
-          }
-
-          // Group 4: Convex backend SDK
-          if (id.includes("/convex/") || id.includes("/@convex-dev/")) {
-            return "convex";
-          }
-
-          // Group 5: Charts (large library, often lazy loaded)
+          // Only split large, independent libraries that don't have circular deps
+          // Charts library (large and usually lazy loaded)
           if (id.includes("/recharts/") || id.includes("/d3-")) {
             return "charts";
           }
 
-          // Group 6: Everything else (utilities, icons, etc.)
-          return "vendor";
+          // Motion library (large animation library)
+          if (id.includes("/motion/") || id.includes("/framer-motion/")) {
+            return "motion";
+          }
+
+          // Let Vite automatically handle the rest to avoid circular dependency issues
+          // This includes React, Radix UI, and other interdependent libraries
         },
       },
     },
