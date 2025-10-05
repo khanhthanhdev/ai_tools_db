@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { ToolsList } from "../components/ToolsList";
 import { SearchBar } from "../components/SearchBar";
+import { SemanticSearchBar } from "../components/SemanticSearchBar";
 import { CategoryFilterMobile } from "../components/CategoryFilterMobile";
 import { Sidebar } from "../components/Sidebar";
-import { motion } from "framer-motion";
-import { Sparkles, Zap, Star, Rocket, Brain, Code, Palette } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Zap, Star, Rocket, Brain, Code, Palette, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Language = "en" | "vi";
+type SearchMode = "keyword" | "semantic";
 
 const translations = {
   en: {
@@ -19,6 +23,11 @@ const translations = {
     free: "Free",
     freemium: "Freemium",
     paid: "Paid",
+    searchMode: "Search Mode",
+    keywordSearch: "Keyword",
+    semanticSearch: "Semantic",
+    keywordDesc: "Traditional search",
+    semanticDesc: "Natural language",
   },
   vi: {
     title: "Cơ sở dữ liệu công cụ AI",
@@ -30,6 +39,11 @@ const translations = {
     free: "Miễn phí",
     freemium: "Freemium",
     paid: "Trả phí",
+    searchMode: "Chế độ tìm kiếm",
+    keywordSearch: "Từ khóa",
+    semanticSearch: "Ngữ nghĩa",
+    keywordDesc: "Tìm kiếm truyền thống",
+    semanticDesc: "Ngôn ngữ tự nhiên",
   },
 };
 
@@ -37,6 +51,7 @@ export function BrowsePage({ language }: { language: Language }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedPricing, setSelectedPricing] = useState("");
+  const [searchMode, setSearchMode] = useState<SearchMode>("keyword");
 
   const t = translations[language];
 
@@ -278,7 +293,7 @@ export function BrowsePage({ language }: { language: Language }) {
       </div>
 
       <motion.div
-        className="mb-8 container max-w-7xl px-3 sm:px-6"
+        className="mb-8 container max-w-7xl px-3 sm:px-6 space-y-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -287,50 +302,115 @@ export function BrowsePage({ language }: { language: Language }) {
           delay: 0.6,
         }}
       >
-        <SearchBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedPricing={selectedPricing}
-          onPricingChange={setSelectedPricing}
-          language={language}
-          translations={t}
-        />
-      </motion.div>
-
-      {/* Mobile Category Filter - Horizontal scrolling below search */}
-      <motion.div
-        className="mb-8 container max-w-7xl px-3 sm:px-6 lg:hidden"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.8,
-          ease: [0.16, 1, 0.3, 1],
-          delay: 0.7,
-        }}
-      >
-        <CategoryFilterMobile
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedPricing={selectedPricing}
-          onPricingChange={setSelectedPricing}
-          language={language}
-          translations={t}
-        />
-      </motion.div>
-
-      {/* Main Content with Tools List */}
-      <main className="min-h-[calc(100vh-8rem)]">
-        <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
-          <ToolsList
-            searchTerm={searchTerm}
-            selectedCategory={selectedCategory}
-            selectedPricing={selectedPricing}
-            language={language}
-          />
+        {/* Search Mode Toggle */}
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">
+            {t.searchMode}:
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant={searchMode === "keyword" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSearchMode("keyword")}
+              className={cn(
+                "gap-2 transition-all",
+                searchMode === "keyword" && "shadow-md"
+              )}
+            >
+              <Search className="h-4 w-4" />
+              <span>{t.keywordSearch}</span>
+            </Button>
+            <Button
+              variant={searchMode === "semantic" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSearchMode("semantic")}
+              className={cn(
+                "gap-2 transition-all",
+                searchMode === "semantic" && "bg-purple-600 hover:bg-purple-700 shadow-md"
+              )}
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>{t.semanticSearch}</span>
+            </Button>
+          </div>
         </div>
-      </main>
+
+        {/* Search Bar - Conditional Rendering with Animation */}
+        <AnimatePresence mode="wait">
+          {searchMode === "keyword" ? (
+            <motion.div
+              key="keyword-search"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <SearchBar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                selectedPricing={selectedPricing}
+                onPricingChange={setSelectedPricing}
+                language={language}
+                translations={t}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="semantic-search"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <SemanticSearchBar
+                language={language}
+                category={selectedCategory}
+                pricing={selectedPricing as "free" | "freemium" | "paid" | undefined}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Mobile Category Filter - Horizontal scrolling below search (keyword mode only) */}
+      {searchMode === "keyword" && (
+        <motion.div
+          className="mb-8 container max-w-7xl px-3 sm:px-6 lg:hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.16, 1, 0.3, 1],
+            delay: 0.7,
+          }}
+        >
+          <CategoryFilterMobile
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            selectedPricing={selectedPricing}
+            onPricingChange={setSelectedPricing}
+            language={language}
+            translations={t}
+          />
+        </motion.div>
+      )}
+
+      {/* Main Content with Tools List (keyword mode only) */}
+      {searchMode === "keyword" && (
+        <main className="min-h-[calc(100vh-8rem)]">
+          <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
+            <ToolsList
+              searchTerm={searchTerm}
+              selectedCategory={selectedCategory}
+              selectedPricing={selectedPricing}
+              language={language}
+            />
+          </div>
+        </main>
+      )}
       </div>
     </div>
   );

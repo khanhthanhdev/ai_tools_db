@@ -6,6 +6,7 @@ const applicationTables = {
   aiTools: defineTable({
     name: v.string(),
     description: v.string(),
+    detail: v.optional(v.string()),
     url: v.string(),
     category: v.string(),
     tags: v.array(v.string()),
@@ -20,6 +21,7 @@ const applicationTables = {
     totalFavourites: v.optional(v.number()),
     ratingSum: v.optional(v.number()),
     embedding: v.optional(v.array(v.number())),
+    embeddingVersion: v.optional(v.string()), // Track which model generated the embedding
   })
     .index("by_category", ["category"])
     .index("by_pricing", ["pricing"])
@@ -32,7 +34,7 @@ const applicationTables = {
     .index("by_pricing_and_isApproved", ["pricing", "isApproved"])
     .vectorIndex("by_embedding", {
       vectorField: "embedding",
-      dimensions: 1536, // OpenAI text-embedding-ada-002
+      dimensions: 768, // Google Gemini gemini-embedding-001
       filterFields: ["isApproved", "language", "category", "pricing"],
     })
     .searchIndex("search_tools", {
@@ -69,6 +71,29 @@ const applicationTables = {
   })
     .index("by_user_and_review", ["userId", "reviewId"])
     .index("by_review", ["reviewId"]),
+  searchCache: defineTable({
+    query: v.string(),
+    queryHash: v.string(),
+    results: v.array(v.id("aiTools")),
+    embedding: v.array(v.number()),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    hitCount: v.number(),
+  })
+    .index("by_query_hash", ["queryHash"])
+    .index("by_expires", ["expiresAt"]),
+  searchAnalytics: defineTable({
+    query: v.string(),
+    userId: v.optional(v.string()),
+    resultsCount: v.number(),
+    clickedToolId: v.optional(v.id("aiTools")),
+    clickedPosition: v.optional(v.number()),
+    timestamp: v.number(),
+    searchType: v.string(), // "semantic", "keyword", "hybrid", "click"
+  })
+    .index("by_timestamp", ["timestamp"])
+    .index("by_query", ["query"])
+    .index("by_user", ["userId"]),
 };
 
 export default defineSchema({

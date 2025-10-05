@@ -55,6 +55,7 @@
       {
         name: "DALL-E 3",
         description: "Advanced AI image generator that creates high-quality images from text descriptions.",
+        detail: "",
         url: "https://openai.com/dall-e-3",
         category: "Image Generation",
         tags: ["image generation", "AI art", "creative"],
@@ -526,6 +527,7 @@
       {
         name: "Mint AI",
         description: "AI-powered personal finance management and budgeting app.",
+        detail: "",
         url: "https://mint.com",
         category: "Finance & Accounting",
         tags: ["personal finance", "budgeting", "expense tracking"],
