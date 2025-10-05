@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { ToolCard } from "../components/ToolCard";
 import { Heart, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
+import { SEO } from "../components/SEO";
+import { generateBreadcrumbStructuredData } from "../lib/structuredData";
 
 type Language = "en" | "vi";
 
@@ -30,9 +32,26 @@ export function FavouritesPage({ language }: { language: Language }) {
   const t = translations[language];
   const favouriteTools = useQuery(api.favourites.getUserFavourites);
 
+  const breadcrumbData = generateBreadcrumbStructuredData([
+    { name: language === "vi" ? "Trang chủ" : "Home", url: "/" },
+    { name: t.myFavourites, url: "/favourites" },
+  ]);
+
   if (favouriteTools === undefined) {
     return (
-      <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
+      <>
+        <SEO
+          title={language === "vi" ? "Yêu Thích Của Tôi" : "My Favourites"}
+          description={language === "vi" 
+            ? "Quản lý các công cụ AI yêu thích của bạn. Truy cập nhanh vào các công cụ bạn đã lưu."
+            : "Manage your favourite AI tools. Quick access to the tools you've saved."}
+          keywords={language === "vi"
+            ? ["yêu thích", "công cụ đã lưu", "bookmark AI", "công cụ của tôi"]
+            : ["favourites", "saved tools", "bookmarked AI", "my tools"]}
+          language={language}
+          structuredData={breadcrumbData}
+        />
+        <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
         <Card className="mx-auto max-w-7xl shadow-sm">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl flex items-center gap-2">
@@ -49,11 +68,24 @@ export function FavouritesPage({ language }: { language: Language }) {
           </CardContent>
         </Card>
       </div>
+      </>
     );
   }
 
   return (
-    <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
+    <>
+      <SEO
+        title={language === "vi" ? "Yêu Thích Của Tôi" : "My Favourites"}
+        description={language === "vi" 
+          ? "Quản lý các công cụ AI yêu thích của bạn. Truy cập nhanh vào các công cụ bạn đã lưu."
+          : "Manage your favourite AI tools. Quick access to the tools you've saved."}
+        keywords={language === "vi"
+          ? ["yêu thích", "công cụ đã lưu", "bookmark AI", "công cụ của tôi"]
+          : ["favourites", "saved tools", "bookmarked AI", "my tools"]}
+        language={language}
+        structuredData={breadcrumbData}
+      />
+      <div className="container max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
       <Card className="mx-auto max-w-7xl shadow-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl flex items-center gap-2">
@@ -93,5 +125,6 @@ export function FavouritesPage({ language }: { language: Language }) {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

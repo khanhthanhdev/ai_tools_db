@@ -27,6 +27,7 @@ import type * as lib_gemini from "../lib/gemini.js";
 import type * as lib_rateLimit from "../lib/rateLimit.js";
 import type * as reviews from "../reviews.js";
 import type * as router from "../router.js";
+import type * as seo from "../seo.js";
 import type * as users from "../users.js";
 
 /**
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   "lib/rateLimit": typeof lib_rateLimit;
   reviews: typeof reviews;
   router: typeof router;
+  seo: typeof seo;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

@@ -1,0 +1,26 @@
+{
+  "name": "AI Tools Database - AI Knowledge Cloud",
+  "short_name": "AI Tools DB",
+  "description": "AI Knowledge Cloud for discovering and recommending the best AI tools. Curated by Tran Khanh Thanh for Vin Uni Library.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity", "utilities", "business", "education"],
+  "lang": "en-US",
+  "scope": "/",
+  "author": "Tran Khanh Thanh (khanhthanhdev)"
+}

@@ -1,13 +1,16 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { ToolCard } from "./ToolCard";
+import { ToolCardSkeletonGrid } from "./ToolCardSkeleton";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { Doc } from "../../convex/_generated/dataModel";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 type ToolWithScore = Doc<"aiTools"> & { _score?: number };
 
@@ -18,6 +21,7 @@ interface ToolsListProps {
   language: "en" | "vi";
   semanticResults?: ToolWithScore[];
   isSemanticSearch?: boolean;
+  useInfiniteScrollMode?: boolean; // Toggle between pagination and infinite scroll
 }
 
 export function ToolsList({
@@ -27,16 +31,33 @@ export function ToolsList({
   language,
   semanticResults,
   isSemanticSearch = false,
+  useInfiniteScrollMode = true, // Default to infinite scroll for better UX
 }: ToolsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [loadedPages, setLoadedPages] = useState(1); // For infinite scroll
   const ITEMS_PER_PAGE_MOBILE = 6;
   const ITEMS_PER_PAGE_DESKTOP = 12;
+  const INITIAL_LOAD = 12; // Load fewer items initially for faster first paint
 
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
+    setLoadedPages(1);
   }, [searchTerm, selectedCategory, selectedPricing, isSemanticSearch]);
+
+  // Use hook for responsive detection
+  const [isMobile, setIsMobile] = useState(false);
   
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
   const searchResults = useQuery(
     api.aiTools.searchTools,
     searchTerm && !isSemanticSearch
@@ -61,44 +82,58 @@ export function ToolsList({
   );
 
   // Use semantic results if provided, otherwise use keyword search or browse results
-  const tools = isSemanticSearch && semanticResults 
+  const allTools = isSemanticSearch && semanticResults 
     ? semanticResults 
     : searchTerm 
       ? searchResults 
       : browseResults;
 
-  // Use hook for responsive detection
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  // Pagination logic
+  // Client-side pagination for infinite scroll
   const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
-  const totalPages = tools ? Math.ceil(tools.length / itemsPerPage) : 0;
+  const itemsToShow = useInfiniteScrollMode ? INITIAL_LOAD * loadedPages : itemsPerPage;
+  const tools = allTools?.slice(0, itemsToShow);
+  
+  const toolsData = allTools ? {
+    tools: tools || [],
+    total: allTools.length,
+    hasMore: (tools?.length || 0) < allTools.length,
+  } : undefined;
+
+  // Infinite scroll logic
+  const handleLoadMore = () => {
+    if (toolsData?.hasMore && !isSemanticSearch) {
+      setLoadedPages(prev => prev + 1);
+    }
+  };
+
+  const sentinelRef = useInfiniteScroll({
+    onLoadMore: handleLoadMore,
+    hasMore: toolsData?.hasMore ?? false,
+    isLoading: toolsData === undefined,
+    threshold: 300,
+  });
+
+  // Pagination logic (for non-infinite scroll mode)
+  const totalPages = allTools ? Math.ceil(allTools.length / itemsPerPage) : 0;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedTools = tools?.slice(startIndex, endIndex);
+  const paginatedTools = useInfiniteScrollMode ? tools : allTools?.slice(startIndex, endIndex);
 
-  if (tools === undefined) {
+  if (toolsData === undefined) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-center">
-          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
-          <p className="font-medium text-muted-foreground">Loading amazing AI tools...</p>
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm font-medium text-muted-foreground">Loading amazing AI tools...</p>
+          </div>
         </div>
+        <ToolCardSkeletonGrid count={INITIAL_LOAD} />
       </div>
     );
   }
 
-  if (tools.length === 0) {
+  if (!tools || tools.length === 0) {
     return (
       <Card className="mx-auto max-w-md py-20 text-center shadow-sm">
         <CardContent className="pt-6">
@@ -259,12 +294,23 @@ export function ToolsList({
           ))}
         </motion.div>
         
-        <PaginationControls />
+        {/* Infinite scroll sentinel or pagination controls */}
+        {useInfiniteScrollMode ? (
+          <>
+            {toolsData?.hasMore && (
+              <div ref={sentinelRef} className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+          </>
+        ) : (
+          <PaginationControls />
+        )}
       </div>
     );
   }
 
-  // Desktop view with categories (no pagination)
+  // Desktop view with categories
   const toolsByCategory = tools.reduce((acc, tool) => {
     if (!acc[tool.category]) {
       acc[tool.category] = [];
@@ -295,68 +341,107 @@ export function ToolsList({
       )}
       
       {categories.map((category, categoryIndex) => (
-        <motion.div 
+        <CategorySection
           key={category}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ 
-            duration: 0.5, 
-            delay: categoryIndex * 0.1,
-            ease: [0.16, 1, 0.3, 1]
+          category={category}
+          tools={toolsByCategory[category]}
+          categoryIndex={categoryIndex}
+          language={language}
+          isSemanticSearch={isSemanticSearch}
+        />
+      ))}
+
+      {/* Infinite scroll sentinel for desktop */}
+      {useInfiniteScrollMode && toolsData?.hasMore && (
+        <div ref={sentinelRef} className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Separate component for category sections with scroll animation
+function CategorySection({
+  category,
+  tools,
+  categoryIndex,
+  language,
+  isSemanticSearch,
+}: {
+  category: string;
+  tools: ToolWithScore[];
+  categoryIndex: number;
+  language: "en" | "vi";
+  isSemanticSearch: boolean;
+}) {
+  const { ref, isVisible } = useScrollAnimation({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+
+  return (
+    <div ref={ref}>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+        transition={{
+          duration: 0.5,
+          delay: Math.min(categoryIndex * 0.1, 0.3), // Cap delay at 0.3s
+          ease: [0.16, 1, 0.3, 1],
+        }}
+      >
+        <div className="mb-6 flex items-center gap-3">
+          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+            {category}
+          </h2>
+          <Badge variant="default" className="text-xs shadow-md">
+            {tools.length}
+          </Badge>
+        </div>
+        <motion.div
+          className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr"
+          initial="hidden"
+          animate={isVisible ? "visible" : "hidden"}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.03, // Reduced for faster animation
+              },
+            },
           }}
         >
-          <div className="mb-6 flex items-center gap-3">
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-              {category}
-            </h2>
-            <Badge variant="default" className="text-xs shadow-md">
-              {toolsByCategory[category].length}
-            </Badge>
-          </div>
-          <motion.div 
-            className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.04
-                }
-              }
-            }}
-          >
-            {toolsByCategory[category].map((tool) => (
-              <motion.div
-                key={tool._id}
-                className="flex h-full min-h-0"
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { 
-                    opacity: 1, 
-                    y: 0,
-                    transition: {
-                      duration: 0.4,
-                      ease: [0.16, 1, 0.3, 1]
-                    }
-                  }
+          {tools.map((tool, index) => (
+            <motion.div
+              key={tool._id}
+              className="flex h-full min-h-0"
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: {
+                    duration: 0.3, // Faster animation
+                    ease: [0.16, 1, 0.3, 1],
+                  },
+                },
+              }}
+            >
+              <ToolCard
+                tool={tool}
+                language={language}
+                showScore={isSemanticSearch && "_score" in tool}
+                config={{
+                  size: "compact",
+                  layout: "vertical",
                 }}
-              >
-                <ToolCard 
-                  tool={tool} 
-                  language={language}
-                  showScore={isSemanticSearch && '_score' in tool}
-                  config={{ 
-                    size: 'compact', 
-                    layout: 'vertical' 
-                  }} 
-                />
-              </motion.div>
-            ))}
-          </motion.div>
+              />
+            </motion.div>
+          ))}
         </motion.div>
-      ))}
+      </motion.div>
     </div>
   );
 }

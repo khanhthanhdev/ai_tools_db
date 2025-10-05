@@ -109,13 +109,7 @@ export function ToolCard({ tool, language, showScore = false }: ToolCardProps) {
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="h-full w-full"
-    >
-      <Card
+    <Card
         className={cn(
           "group/card relative w-full h-full min-h-[300px] sm:min-h-[340px]",
           "overflow-hidden",
@@ -282,7 +276,7 @@ export function ToolCard({ tool, language, showScore = false }: ToolCardProps) {
               asChild
               variant="default"
               size="sm"
-              className="flex-1 group/btn relative overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-9 sm:h-10 text-xs sm:text-sm"
+              className="w-3/5 group/btn relative overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-9 sm:h-10 text-xs sm:text-sm"
             >
               <a
                 href={tool.url}
@@ -302,14 +296,16 @@ export function ToolCard({ tool, language, showScore = false }: ToolCardProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="group/btn relative overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-9 w-9 sm:h-10 sm:w-10 p-0"
+                className="w-2/5 group/btn relative overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-9 sm:h-10 px-2"
               >
-                <Info className="h-4 w-4 sm:h-4 sm:w-4" />
+                <Info className="h-4 w-4 sm:h-4 sm:w-4 mr-1" />
+                <span className="text-xs sm:text-sm">
+                  {language === "en" ? "Details" : "Chi tiết"}
+                </span>
               </Button>
             </ToolDetailDrawer>
           </div>
         </CardContent>
       </Card>
-    </motion.div>
   );
 }

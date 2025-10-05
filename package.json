@@ -8,6 +8,8 @@
     "dev:frontend": "vite --open",
     "dev:backend": "convex dev",
     "build": "vite build",
+    "prebuild": "npm run generate:sitemap",
+    "generate:sitemap": "node scripts/generate-sitemap.mjs",
     "lint": "tsc -p convex -noEmit --pretty false && tsc -p . -noEmit --pretty false && convex dev --once && vite build"
   },
   "dependencies": {
@@ -53,6 +55,7 @@
     "react": "^19.0.0",
     "react-day-picker": "^9.11.0",
     "react-dom": "^19.0.0",
+    "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.63.0",
     "react-resizable-panels": "^3.0.6",
     "react-router-dom": "^7.9.3",

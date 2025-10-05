@@ -19,6 +19,8 @@ import SocialButton, {
   type SocialOption,
 } from "../components/kokonutui/social-button";
 import { Lightbulb, UsersRound, Rocket, Sparkles, MapPin } from "lucide-react";
+import { SEO } from "../components/SEO";
+import { generateOrganizationStructuredData } from "../lib/structuredData";
 
 type Language = "en" | "vi";
 
@@ -268,8 +270,22 @@ export function AboutUsPage() {
       };
     });
 
+  const organizationData = generateOrganizationStructuredData();
+
   return (
-    <div className="relative min-h-screen">
+    <>
+      <SEO
+        title={language === "vi" ? "Về Chúng Tôi - Trần Khánh Thành" : "About Us - Tran Khanh Thanh"}
+        description={language === "vi" 
+          ? "Tìm hiểu về Trần Khánh Thành (khanhthanhdev), người sáng lập AI Tools Database. Đám mây tri thức AI được tuyển chọn cho Thư viện Vin Uni."
+          : "Learn about Tran Khanh Thanh (khanhthanhdev), founder of AI Tools Database. AI Knowledge Cloud curated for Vin Uni Library."}
+        keywords={language === "vi"
+          ? ["Trần Khánh Thành", "khanhthanhdev", "thanhtran", "Thư viện Vin Uni", "đám mây tri thức AI", "đề xuất công cụ AI"]
+          : ["Tran Khanh Thanh", "khanhthanhdev", "thanhtran", "Vin Uni Library", "AI knowledge cloud", "AI tool recommendation"]}
+        language={language}
+        structuredData={organizationData}
+      />
+      <div className="relative min-h-screen">
       <div className="fixed inset-0 -z-10">
         <BeamsBackground intensity="subtle" className="h-full w-full" />
       </div>
@@ -426,5 +442,6 @@ export function AboutUsPage() {
         </section>
       </main>
     </div>
+    </>
   );
 }

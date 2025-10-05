@@ -8,6 +8,8 @@ import { Button } from "../components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Zap, Star, Rocket, Brain, Code, Palette, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SEO } from "../components/SEO";
+import { generateWebsiteStructuredData } from "../lib/structuredData";
 
 type Language = "en" | "vi";
 type SearchMode = "keyword" | "semantic";
@@ -56,7 +58,19 @@ export function BrowsePage({ language }: { language: Language }) {
   const t = translations[language];
 
   return (
-    <div className="relative flex">
+    <>
+      <SEO
+        title={language === "vi" ? "Cơ Sở Dữ Liệu Công Cụ AI - Đám Mây Tri Thức AI" : "AI Tools Database - AI Knowledge Cloud & Tool Recommendation"}
+        description={language === "vi" 
+          ? "Đám mây tri thức AI để khám phá và đề xuất các công cụ AI tốt nhất. Được tuyển chọn bởi Trần Khánh Thành (khanhthanhdev) cho Thư viện Vin Uni và cộng đồng AI."
+          : "AI Knowledge Cloud for discovering and recommending the best AI tools. Curated by Tran Khanh Thanh (khanhthanhdev) for Vin Uni Library and the AI community."}
+        keywords={language === "vi" 
+          ? ["đám mây tri thức AI", "đề xuất công cụ AI", "Thư viện Vin Uni", "công cụ AI", "trí tuệ nhân tạo", "khanhthanhdev", "Trần Khánh Thành"]
+          : ["AI knowledge cloud", "AI tool recommendation", "Vin Uni Library", "AI tools", "artificial intelligence", "khanhthanhdev", "Tran Khanh Thanh", "thanhtran"]}
+        language={language}
+        structuredData={generateWebsiteStructuredData(language)}
+      />
+      <div className="relative flex">
       {/* Sidebar - Fixed space on the left (desktop only) */}
       <Sidebar
         isOpen={false}
@@ -413,5 +427,6 @@ export function BrowsePage({ language }: { language: Language }) {
       )}
       </div>
     </div>
+    </>
   );
 }
