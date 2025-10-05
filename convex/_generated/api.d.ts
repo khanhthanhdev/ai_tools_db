@@ -20,6 +20,7 @@ import type * as cache from "../cache.js";
 import type * as favourites from "../favourites.js";
 import type * as http from "../http.js";
 import type * as lib_cache from "../lib/cache.js";
+import type * as lib_constants from "../lib/constants.js";
 import type * as lib_embeddingHelpers from "../lib/embeddingHelpers.js";
 import type * as lib_gemini from "../lib/gemini.js";
 import type * as reviews from "../reviews.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   favourites: typeof favourites;
   http: typeof http;
   "lib/cache": typeof lib_cache;
+  "lib/constants": typeof lib_constants;
   "lib/embeddingHelpers": typeof lib_embeddingHelpers;
   "lib/gemini": typeof lib_gemini;
   reviews: typeof reviews;

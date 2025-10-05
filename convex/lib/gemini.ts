@@ -3,7 +3,15 @@
  * Handles embedding generation using Google's Generative AI API
  */
 
-import { GoogleGenerativeAI, TaskType } from "@google/generative-ai";
+import {
+    GoogleGenerativeAI,
+    TaskType,
+    EmbedContentRequest,
+} from "@google/generative-ai";
+import {
+    GEMINI_EMBEDDING_DIMENSIONS,
+    GEMINI_EMBEDDING_MODEL,
+} from "./constants";
 
 /**
  * Get configured Gemini client
@@ -27,9 +35,13 @@ export function getGeminiClient(): GoogleGenerativeAI {
  * Includes retry logic for rate limiting and network errors
  * @param text - Text to embed
  * @param retryCount - Current retry attempt (internal use)
- * @returns 768-dimensional embedding vector
+ * @returns embedding vector from gemini-embedding-001
  * @throws Error if text is empty or API fails after retries
  */
+type EmbedContentRequestWithOutput = EmbedContentRequest & {
+    outputDimensionality?: number;
+};
+
 export async function generateEmbedding(
     text: string,
     retryCount = 0
@@ -40,19 +52,25 @@ export async function generateEmbedding(
     }
 
     const client = getGeminiClient();
-    const model = client.getGenerativeModel({ model: "gemini-embedding-001" });
+    const model = client.getGenerativeModel({ model: GEMINI_EMBEDDING_MODEL });
 
     try {
         // Use SEMANTIC_SIMILARITY task type for better semantic search results
-        const result = await model.embedContent({
+        const request: EmbedContentRequestWithOutput = {
             content: { role: "user", parts: [{ text }] },
             taskType: TaskType.SEMANTIC_SIMILARITY,
-        });
+            outputDimensionality: GEMINI_EMBEDDING_DIMENSIONS,
+        };
+
+        const result = await model.embedContent(request);
 
         // Validate response
-        if (!result.embedding?.values || result.embedding.values.length !== 768) {
+        if (
+            !result.embedding?.values ||
+            result.embedding.values.length !== GEMINI_EMBEDDING_DIMENSIONS
+        ) {
             throw new Error(
-                `Invalid embedding response: expected 768 dimensions, got ${result.embedding?.values?.length || 0}`
+                `Invalid embedding response: expected ${GEMINI_EMBEDDING_DIMENSIONS} dimensions, got ${result.embedding?.values?.length || 0}`
             );
         }
 
@@ -111,7 +129,7 @@ export async function generateEmbedding(
  * Generate embeddings for multiple texts in batch
  * Processes texts sequentially with rate limiting
  * @param texts - Array of texts to embed
- * @returns Array of 768-dimensional embedding vectors (empty array for failed texts)
+ * @returns Array of embedding vectors (empty array for failed texts)
  */
 export async function generateEmbeddingsBatch(
     texts: string[]
@@ -121,7 +139,7 @@ export async function generateEmbeddingsBatch(
     }
 
     const client = getGeminiClient();
-    const model = client.getGenerativeModel({ model: "gemini-embedding-001" });
+    const model = client.getGenerativeModel({ model: GEMINI_EMBEDDING_MODEL });
 
     const embeddings: number[][] = [];
 
@@ -137,15 +155,21 @@ export async function generateEmbeddingsBatch(
 
         try {
             // Use SEMANTIC_SIMILARITY task type for better semantic search results
-            const result = await model.embedContent({
+            const request: EmbedContentRequestWithOutput = {
                 content: { role: "user", parts: [{ text }] },
                 taskType: TaskType.SEMANTIC_SIMILARITY,
-            });
+                outputDimensionality: GEMINI_EMBEDDING_DIMENSIONS,
+            };
+
+            const result = await model.embedContent(request);
 
             // Validate response
-            if (!result.embedding?.values || result.embedding.values.length !== 768) {
+            if (
+                !result.embedding?.values ||
+                result.embedding.values.length !== GEMINI_EMBEDDING_DIMENSIONS
+            ) {
                 console.error(
-                    `Invalid embedding at index ${i}: expected 768 dimensions, got ${result.embedding?.values?.length || 0}`
+                    `Invalid embedding at index ${i}: expected ${GEMINI_EMBEDDING_DIMENSIONS} dimensions, got ${result.embedding?.values?.length || 0}`
                 );
                 embeddings.push([]);
             } else {

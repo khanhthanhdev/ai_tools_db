@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
+import { GEMINI_EMBEDDING_DIMENSIONS } from "./lib/constants";
 
 const applicationTables = {
   aiTools: defineTable({
@@ -34,7 +35,7 @@ const applicationTables = {
     .index("by_pricing_and_isApproved", ["pricing", "isApproved"])
     .vectorIndex("by_embedding", {
       vectorField: "embedding",
-      dimensions: 768, // Google Gemini gemini-embedding-001
+      dimensions: GEMINI_EMBEDDING_DIMENSIONS, // Google Gemini gemini-embedding-001 configured output size
       filterFields: ["isApproved", "language", "category", "pricing"],
     })
     .searchIndex("search_tools", {

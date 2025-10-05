@@ -50,7 +50,7 @@ export const getCachedSearch = query({
  * @param query - Original search query text
  * @param queryHash - Hash of the query for fast lookup
  * @param results - Array of tool IDs in the result set
- * @param embedding - Query embedding vector (768 dimensions)
+ * @param embedding - Query embedding vector (matches Gemini embedding dimensions)
  * @param expiresAt - Timestamp when cache entry expires
  */
 export const storeSearchCache = mutation({

@@ -26,7 +26,7 @@
 
 - ✅ **FREE tier:** 1,500 requests/day (15 RPM)
 - ✅ **Lower cost:** $0.00001/1K chars vs OpenAI's $0.0001/1K tokens
-- ✅ **768 dimensions:** Smaller vectors = faster search, less storage
+- ✅ **768 dimensions (configurable via `outputDimensionality`):** Balanced vectors for speed + accuracy
 - ✅ **Multilingual:** Excellent for Vietnamese + English
 - ✅ **Latest model:** gemini-embedding-001 (2024)
 
@@ -121,7 +121,7 @@ export default defineSchema({
     // NEW: Vector index for semantic search
     .vectorIndex("by_embedding", {
       vectorField: "embedding",
-      dimensions: 768, // Gemini gemini-embedding-001
+      dimensions: 768, // Gemini gemini-embedding-001 configured via outputDimensionality
       filterFields: ["isApproved", "language", "category", "pricing"],
     })
     .searchIndex("search_tools", {
@@ -147,7 +147,7 @@ npx convex dev
 
 ```typescript
 // convex/lib/gemini.ts
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, TaskType } from "@google/generative-ai";
 
 // Initialize Gemini
 export function getGeminiClient(apiKey: string) {
@@ -162,7 +162,11 @@ export async function generateEmbedding(
   const genAI = getGeminiClient(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
 
-  const result = await model.embedContent(text);
+  const result = await model.embedContent({
+    content: { role: "user", parts: [{ text }] },
+    taskType: TaskType.SEMANTIC_SIMILARITY,
+    outputDimensionality: 768,
+  });
   const embedding = result.embedding;
 
   return embedding.values;
@@ -177,7 +181,13 @@ export async function generateEmbeddingsBatch(
   const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
 
   const results = await Promise.all(
-    texts.map((text) => model.embedContent(text))
+    texts.map((text) =>
+      model.embedContent({
+        content: { role: "user", parts: [{ text }] },
+        taskType: TaskType.SEMANTIC_SIMILARITY,
+        outputDimensionality: 768,
+      })
+    )
   );
 
   return results.map((result) => result.embedding.values);

@@ -2,6 +2,10 @@ import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { api } from "./_generated/api";
+import {
+  GEMINI_EMBEDDING_DIMENSIONS,
+  GEMINI_EMBEDDING_MODEL,
+} from "./lib/constants";
 
 const normalizeName = (value: string) =>
   value
@@ -590,7 +594,7 @@ export const getToolsWithoutEmbeddings = query({
 
     // Filter tools that don't have embeddings or have wrong version
     return allTools.filter(
-      (tool) => !tool.embedding || tool.embeddingVersion !== "gemini-embedding-001"
+      (tool) => !tool.embedding || tool.embeddingVersion !== GEMINI_EMBEDDING_MODEL
     );
   },
 });
@@ -608,7 +612,7 @@ export const getEmbeddingStats = query({
       .collect();
 
     const withEmbeddings = allTools.filter(
-      (tool) => tool.embedding && tool.embeddingVersion === "gemini-embedding-001"
+      (tool) => tool.embedding && tool.embeddingVersion === GEMINI_EMBEDDING_MODEL
     );
 
     const total = allTools.length;
@@ -629,7 +633,7 @@ export const getEmbeddingStats = query({
  * Vector search query using embeddings
  * Searches for tools similar to the provided embedding vector
  * 
- * @param vector - The query embedding vector (768 dimensions for Gemini)
+ * @param vector - The query embedding vector (matches Gemini embedding dimensions)
  * @param limit - Maximum number of results to return
  * @param language - Optional language filter
  * @param category - Optional category filter
@@ -646,9 +650,9 @@ export const vectorSearch = query({
   },
   handler: async (ctx, args) => {
     // Validate vector dimensions
-    if (args.vector.length !== 768) {
+    if (args.vector.length !== GEMINI_EMBEDDING_DIMENSIONS) {
       throw new Error(
-        `Invalid vector dimensions: expected 768, got ${args.vector.length}`
+        `Invalid vector dimensions: expected ${GEMINI_EMBEDDING_DIMENSIONS}, got ${args.vector.length}`
       );
     }
 
@@ -662,7 +666,7 @@ export const vectorSearch = query({
     // Filter tools that have embeddings and match optional filters
     let filteredTools = allTools.filter((tool) => {
       // Must have valid embedding
-      if (!tool.embedding || tool.embedding.length !== 768) {
+      if (!tool.embedding || tool.embedding.length !== GEMINI_EMBEDDING_DIMENSIONS) {
         return false;
       }
 
@@ -723,7 +727,11 @@ export const getSimilarTools = query({
     const sourceTool = await ctx.db.get(args.toolId);
     
     // If tool doesn't exist or doesn't have an embedding, return empty array
-    if (!sourceTool || !sourceTool.embedding || sourceTool.embedding.length !== 768) {
+    if (
+      !sourceTool ||
+      !sourceTool.embedding ||
+      sourceTool.embedding.length !== GEMINI_EMBEDDING_DIMENSIONS
+    ) {
       return [];
     }
 
@@ -741,7 +749,7 @@ export const getSimilarTools = query({
       }
 
       // Must have valid embedding
-      if (!tool.embedding || tool.embedding.length !== 768) {
+      if (!tool.embedding || tool.embedding.length !== GEMINI_EMBEDDING_DIMENSIONS) {
         return false;
       }
 
@@ -781,9 +789,9 @@ export const updateToolEmbedding = internalMutation({
   },
   handler: async (ctx, args) => {
     // Validate embedding dimensions
-    if (args.embedding.length !== 768) {
+    if (args.embedding.length !== GEMINI_EMBEDDING_DIMENSIONS) {
       throw new Error(
-        `Invalid embedding dimensions: expected 768, got ${args.embedding.length}`
+        `Invalid embedding dimensions: expected ${GEMINI_EMBEDDING_DIMENSIONS}, got ${args.embedding.length}`
       );
     }
 

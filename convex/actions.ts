@@ -6,9 +6,13 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api, internal } from "./_generated/api";
-import { getGeminiClient, generateEmbedding } from "./lib/gemini";
+import { generateEmbedding } from "./lib/gemini";
 import { createEmbeddingText } from "./lib/embeddingHelpers";
 import { hashQuery, getCacheExpiry } from "./lib/cache";
+import {
+  GEMINI_EMBEDDING_DIMENSIONS,
+  GEMINI_EMBEDDING_MODEL,
+} from "./lib/constants";
 
 /**
  * Verify Gemini API configuration
@@ -25,8 +29,8 @@ export const verifyGeminiConfig = action({
         success: true,
         message: "Gemini API is configured correctly",
         embeddingDimensions: testEmbedding.length,
-        expectedDimensions: 768,
-        isCorrectDimension: testEmbedding.length === 768,
+        expectedDimensions: GEMINI_EMBEDDING_DIMENSIONS,
+        isCorrectDimension: testEmbedding.length === GEMINI_EMBEDDING_DIMENSIONS,
       };
     } catch (error: any) {
       return {
@@ -87,9 +91,9 @@ export const generateToolEmbedding = action({
       const embedding = await generateEmbedding(embeddingText);
 
       // Validate embedding
-      if (!embedding || embedding.length !== 768) {
+      if (!embedding || embedding.length !== GEMINI_EMBEDDING_DIMENSIONS) {
         throw new Error(
-          `Invalid embedding generated: expected 768 dimensions, got ${embedding?.length || 0}`
+          `Invalid embedding generated: expected ${GEMINI_EMBEDDING_DIMENSIONS} dimensions, got ${embedding?.length || 0}`
         );
       }
 
@@ -97,7 +101,7 @@ export const generateToolEmbedding = action({
       await ctx.runMutation(internal.aiTools.updateToolEmbedding, {
         toolId: args.toolId,
         embedding,
-        embeddingVersion: "gemini-embedding-001",
+        embeddingVersion: GEMINI_EMBEDDING_MODEL,
       });
 
       console.log(`Successfully generated embedding for tool: ${tool.name}`);
@@ -107,7 +111,7 @@ export const generateToolEmbedding = action({
         toolId: args.toolId,
         toolName: tool.name,
         embeddingDimensions: embedding.length,
-        embeddingVersion: "gemini-embedding-001",
+        embeddingVersion: GEMINI_EMBEDDING_MODEL,
         message: `Embedding generated successfully for "${tool.name}"`,
       };
     } catch (error: any) {
@@ -197,9 +201,9 @@ export const generateAllEmbeddings = action({
         const embedding = await generateEmbedding(embeddingText);
 
         // Validate embedding
-        if (!embedding || embedding.length !== 768) {
+        if (!embedding || embedding.length !== GEMINI_EMBEDDING_DIMENSIONS) {
           throw new Error(
-            `Invalid embedding: expected 768 dimensions, got ${embedding?.length || 0}`
+            `Invalid embedding: expected ${GEMINI_EMBEDDING_DIMENSIONS} dimensions, got ${embedding?.length || 0}`
           );
         }
 
@@ -207,7 +211,7 @@ export const generateAllEmbeddings = action({
         await ctx.runMutation(internal.aiTools.updateToolEmbedding, {
           toolId: tool._id,
           embedding,
-          embeddingVersion: "gemini-embedding-001",
+          embeddingVersion: GEMINI_EMBEDDING_MODEL,
         });
 
         successCount++;
@@ -338,9 +342,9 @@ export const semanticSearch = action({
       const queryEmbedding: number[] = await generateEmbedding(trimmedQuery);
 
       // Validate embedding
-      if (!queryEmbedding || queryEmbedding.length !== 768) {
+      if (!queryEmbedding || queryEmbedding.length !== GEMINI_EMBEDDING_DIMENSIONS) {
         throw new Error(
-          `Invalid query embedding: expected 768 dimensions, got ${queryEmbedding?.length || 0}`
+          `Invalid query embedding: expected ${GEMINI_EMBEDDING_DIMENSIONS} dimensions, got ${queryEmbedding?.length || 0}`
         );
       }
 
