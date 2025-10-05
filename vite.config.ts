@@ -48,7 +48,11 @@ window.addEventListener('message', async (message) => {
   optimizeDeps: {
     include: [
       "react",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime",
       "react-dom",
+      "react-dom/client",
+      "react-is",
       "react-router-dom",
       "convex",
       "@convex-dev/auth",
@@ -64,8 +68,6 @@ window.addEventListener('message', async (message) => {
       "class-variance-authority",
     ],
     exclude: ["@google/generative-ai"],
-    // Force optimization even if in node_modules
-    force: mode === "development",
   },
 
   resolve: {
@@ -144,9 +146,15 @@ window.addEventListener('message', async (message) => {
             return undefined;
           }
 
-          // Core React (keep together for better caching)
-          if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/scheduler/")) {
-            return "react-core";
+          // CRITICAL: Keep React in the main vendor chunk to avoid duplication issues
+          // React must be available before any React-dependent libraries load
+          if (
+            id.includes("/react/") || 
+            id.includes("/react-dom/") || 
+            id.includes("/react-is/") ||
+            id.includes("/scheduler/")
+          ) {
+            return "vendor";
           }
 
           // React Router
@@ -164,7 +172,7 @@ window.addEventListener('message', async (message) => {
             return "convex";
           }
 
-          // Radix UI (many small components, group together)
+          // Radix UI (depends on React, keep separate)
           if (id.includes("/@radix-ui/")) {
             return "radix";
           }
@@ -196,7 +204,7 @@ window.addEventListener('message', async (message) => {
             return "utils";
           }
 
-          // Everything else goes to vendor
+          // Everything else goes to vendor (including React)
           return "vendor";
         },
       },

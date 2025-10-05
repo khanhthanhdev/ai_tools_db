@@ -103,6 +103,16 @@ If you need even more performance:
 
 ## Common Issues & Solutions
 
+### Issue: "Cannot read properties of undefined (reading 'forwardRef')" with Radix UI
+**Solution**: React must be in the vendor chunk, not split separately. This is now fixed - React stays in the main vendor chunk to ensure all React-dependent libraries can access it.
+
+**If you still see this error**:
+```bash
+# Clear Vite cache
+rm -rf node_modules/.vite dist
+npm run build
+```
+
 ### Issue: Build fails with memory error
 **Solution**: Increase Node memory
 ```bash
