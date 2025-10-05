@@ -6,7 +6,15 @@ import { Button } from "./ui/button";
 import BeamsBackground from "./kokonutui/beams-background";
 import { SignInDialog } from "./SignInDialog";
 import { useAuthActions } from "@convex-dev/auth/react";
-import React from "react";
+import React, { useState } from "react";
+import { Menu } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 
 type Language = "en" | "vi";
 
@@ -51,6 +59,7 @@ export function Layout({
   const location = useLocation();
   const { signOut } = useAuthActions();
   const t = translations[language];
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const getVariant = (path: string) => {
     return location.pathname === path ? "default" : "ghost";
@@ -58,6 +67,10 @@ export function Layout({
 
   const handleSignOut = () => {
     void signOut();
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -104,43 +117,70 @@ export function Layout({
           {/* Right side: Language & Auth */}
           <div className="flex items-center gap-1 sm:gap-2">
             <LanguageToggle language={language} onLanguageChange={setLanguage} />
-            <Authenticated>
-              <Button onClick={handleSignOut} variant="outline" size="sm" className="shadow-sm text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
-                {t.signOut}
-              </Button>
-            </Authenticated>
-            <Unauthenticated>
-              <SignInDialog language={language}>
-                <Button size="sm" className="shadow-sm text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
-                  {t.signIn}
-                </Button>
-              </SignInDialog>
-            </Unauthenticated>
-          </div>
-        </div>
-
-        {/* Mobile Navigation - Dropdown below logo */}
-        <div className="md:hidden border-t bg-background/95">
-          <div className="container px-3 py-2">
-            <nav className="flex gap-1 justify-start overflow-x-auto scrollbar-hide">
-              <Button asChild variant={getVariant("/")} size="sm" className="whitespace-nowrap text-xs h-8">
-                <Link to="/">{t.browse}</Link>
-              </Button>
-              <Button asChild variant={getVariant("/about-us")} size="sm" className="whitespace-nowrap text-xs h-8">
-                <Link to="/about-us">{t.aboutUs}</Link>
-              </Button>
+            
+            {/* Desktop Auth Buttons */}
+            <div className="hidden md:flex items-center gap-2">
               <Authenticated>
-                <Button asChild variant={getVariant("/add-tool")} size="sm" className="whitespace-nowrap text-xs h-8">
-                  <Link to="/add-tool">{t.addTool}</Link>
-                </Button>
-                <Button asChild variant={getVariant("/favourites")} size="sm" className="whitespace-nowrap text-xs h-8">
-                  <Link to="/favourites">{t.favourites}</Link>
-                </Button>
-                <Button asChild variant={getVariant("/stats")} size="sm" className="whitespace-nowrap text-xs h-8">
-                  <Link to="/stats">{t.stats}</Link>
+                <Button onClick={handleSignOut} variant="outline" size="sm" className="shadow-sm">
+                  {t.signOut}
                 </Button>
               </Authenticated>
-            </nav>
+              <Unauthenticated>
+                <SignInDialog language={language}>
+                  <Button size="sm" className="shadow-sm">
+                    {t.signIn}
+                  </Button>
+                </SignInDialog>
+              </Unauthenticated>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="md:hidden h-8 w-8 p-0">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader>
+                  <SheetTitle>{t.title}</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-3 mt-6">
+                  <Button asChild variant={getVariant("/")} size="default" className="justify-start" onClick={closeMobileMenu}>
+                    <Link to="/">{t.browse}</Link>
+                  </Button>
+                  <Button asChild variant={getVariant("/about-us")} size="default" className="justify-start" onClick={closeMobileMenu}>
+                    <Link to="/about-us">{t.aboutUs}</Link>
+                  </Button>
+                  <Authenticated>
+                    <Button asChild variant={getVariant("/add-tool")} size="default" className="justify-start" onClick={closeMobileMenu}>
+                      <Link to="/add-tool">{t.addTool}</Link>
+                    </Button>
+                    <Button asChild variant={getVariant("/favourites")} size="default" className="justify-start" onClick={closeMobileMenu}>
+                      <Link to="/favourites">{t.favourites}</Link>
+                    </Button>
+                    <Button asChild variant={getVariant("/stats")} size="default" className="justify-start" onClick={closeMobileMenu}>
+                      <Link to="/stats">{t.stats}</Link>
+                    </Button>
+                    <div className="border-t pt-3 mt-3">
+                      <Button onClick={() => { handleSignOut(); closeMobileMenu(); }} variant="outline" size="default" className="w-full">
+                        {t.signOut}
+                      </Button>
+                    </div>
+                  </Authenticated>
+                  <Unauthenticated>
+                    <div className="border-t pt-3 mt-3">
+                      <SignInDialog language={language}>
+                        <Button size="default" className="w-full">
+                          {t.signIn}
+                        </Button>
+                      </SignInDialog>
+                    </div>
+                  </Unauthenticated>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
