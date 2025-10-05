@@ -9,6 +9,8 @@ import { api, internal } from "./_generated/api";
 import { generateEmbedding } from "./lib/gemini";
 import { createEmbeddingText } from "./lib/embeddingHelpers";
 import { hashQuery, getCacheExpiry } from "./lib/cache";
+import { checkRateLimit } from "./lib/rateLimit";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import {
   GEMINI_EMBEDDING_DIMENSIONS,
   GEMINI_EMBEDDING_MODEL,
@@ -296,7 +298,24 @@ export const semanticSearch = action({
       return [];
     }
 
-    console.log(`Semantic search for query: "${trimmedQuery}"`);
+    // Get user ID for rate limiting (use "anonymous" for unauthenticated users)
+    let userId: string;
+    try {
+      const authUserId = await getAuthUserId(ctx);
+      userId = authUserId || "anonymous";
+    } catch (error) {
+      // If auth check fails, treat as anonymous
+      userId = "anonymous";
+    }
+
+    // Check rate limit (15 searches per minute per user)
+    const rateLimitCheck = checkRateLimit(userId, "search");
+    if (!rateLimitCheck.allowed) {
+      console.log(`Rate limit exceeded for user ${userId}: ${rateLimitCheck.message}`);
+      throw new Error(rateLimitCheck.message || "Rate limit exceeded. Please try again later.");
+    }
+
+    console.log(`Semantic search for query: "${trimmedQuery}" (user: ${userId}, remaining: ${rateLimitCheck.remainingRequests})`);
 
     // Generate cache key from query and filters
     const cacheKey = JSON.stringify({
@@ -333,6 +352,14 @@ export const semanticSearch = action({
         });
 
         console.log(`Returned ${results.length} cached results`);
+        
+        // Log search analytics
+        await ctx.runMutation(api.analytics.logSearch, {
+          query: trimmedQuery,
+          resultsCount: results.length,
+          searchType: "semantic",
+        });
+        
         return results;
       }
 
@@ -380,6 +407,13 @@ export const semanticSearch = action({
         console.error("Failed to store results in cache:", cacheError.message || cacheError);
       }
 
+      // Log search analytics
+      await ctx.runMutation(api.analytics.logSearch, {
+        query: trimmedQuery,
+        resultsCount: results.length,
+        searchType: "semantic",
+      });
+
       return results;
     } catch (error: any) {
       // Log the error for debugging
@@ -397,11 +431,26 @@ export const semanticSearch = action({
         });
 
         console.log(`Keyword search fallback returned ${fallbackResults.length} results`);
+        
+        // Log search analytics for fallback
+        await ctx.runMutation(api.analytics.logSearch, {
+          query: trimmedQuery,
+          resultsCount: fallbackResults.length,
+          searchType: "keyword-fallback",
+        });
 
         return fallbackResults;
       } catch (fallbackError: any) {
         // If even keyword search fails, log and return empty array
         console.error("Keyword search fallback also failed:", fallbackError.message || fallbackError);
+        
+        // Log failed search
+        await ctx.runMutation(api.analytics.logSearch, {
+          query: trimmedQuery,
+          resultsCount: 0,
+          searchType: "semantic-failed",
+        });
+        
         return [];
       }
     }
@@ -437,7 +486,24 @@ export const hybridSearch = action({
       return [];
     }
 
-    console.log(`Hybrid search for query: "${trimmedQuery}"`);
+    // Get user ID for rate limiting (use "anonymous" for unauthenticated users)
+    let userId: string;
+    try {
+      const authUserId = await getAuthUserId(ctx);
+      userId = authUserId || "anonymous";
+    } catch (error) {
+      // If auth check fails, treat as anonymous
+      userId = "anonymous";
+    }
+
+    // Check rate limit (15 searches per minute per user)
+    const rateLimitCheck = checkRateLimit(userId, "search");
+    if (!rateLimitCheck.allowed) {
+      console.log(`Rate limit exceeded for user ${userId}: ${rateLimitCheck.message}`);
+      throw new Error(rateLimitCheck.message || "Rate limit exceeded. Please try again later.");
+    }
+
+    console.log(`Hybrid search for query: "${trimmedQuery}" (user: ${userId}, remaining: ${rateLimitCheck.remainingRequests})`);
 
     try {
       // Execute both searches in parallel for better performance
@@ -507,6 +573,13 @@ export const hybridSearch = action({
         `${mergedResults.filter(r => r._searchType === "hybrid").length} both)`
       );
 
+      // Log search analytics
+      await ctx.runMutation(api.analytics.logSearch, {
+        query: trimmedQuery,
+        resultsCount: mergedResults.length,
+        searchType: "hybrid",
+      });
+
       return mergedResults;
     } catch (error: any) {
       // If hybrid search fails, fall back to keyword search only
@@ -521,10 +594,25 @@ export const hybridSearch = action({
         });
 
         console.log(`Keyword search fallback returned ${fallbackResults.length} results`);
+        
+        // Log search analytics for fallback
+        await ctx.runMutation(api.analytics.logSearch, {
+          query: trimmedQuery,
+          resultsCount: fallbackResults.length,
+          searchType: "hybrid-fallback",
+        });
 
         return fallbackResults;
       } catch (fallbackError: any) {
         console.error("Keyword search fallback also failed:", fallbackError.message || fallbackError);
+        
+        // Log failed search
+        await ctx.runMutation(api.analytics.logSearch, {
+          query: trimmedQuery,
+          resultsCount: 0,
+          searchType: "hybrid-failed",
+        });
+        
         return [];
       }
     }

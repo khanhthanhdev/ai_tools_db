@@ -34,6 +34,7 @@ export const translations = {
     loading: "Searching...",
     resultsCount: "results",
     similarityScore: "Match",
+    similarTools: "Similar Tools",
   },
   vi: {
     title: "Cơ sở dữ liệu công cụ AI",
@@ -69,5 +70,6 @@ export const translations = {
     loading: "Đang tìm kiếm...",
     resultsCount: "kết quả",
     similarityScore: "Khớp",
+    similarTools: "Công cụ tương tự",
   },
 };

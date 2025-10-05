@@ -43,6 +43,7 @@ export interface ToolCardFlipProps {
   // Interactive elements
   favouriteButton: ReactNode;
   trendingIndicator?: ReactNode;
+  similarityScore?: number;
 }
 
 export default function ToolCardFlip({
@@ -60,6 +61,7 @@ export default function ToolCardFlip({
   pricingLabel,
   favouriteButton,
   trendingIndicator,
+  similarityScore,
 }: ToolCardFlipProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const user = useQuery(api.auth.loggedInUser);
@@ -167,15 +169,38 @@ export default function ToolCardFlip({
             <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
               {smallMedia}
               <div className="flex flex-col gap-1.5 min-w-0 flex-1">
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "text-xs font-semibold shadow-sm w-fit transition-all duration-300 group-hover/card:scale-105 group-hover/card:shadow-md",
-                    pricingStyle.badge
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-xs font-semibold shadow-sm w-fit transition-all duration-300 group-hover/card:scale-105 group-hover/card:shadow-md",
+                      pricingStyle.badge
+                    )}
+                  >
+                    {pricingStyle.icon} {pricingLabel}
+                  </Badge>
+                  {similarityScore !== undefined && (
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="outline"
+                            className="text-xs font-semibold shadow-sm w-fit transition-all duration-300 group-hover/card:scale-105 group-hover/card:shadow-md border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-400"
+                          >
+                            ✨ {similarityScore}%
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <p>
+                            {language === "en" 
+                              ? "Similarity score" 
+                              : "Điểm tương đồng"}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
-                >
-                  {pricingStyle.icon} {pricingLabel}
-                </Badge>
+                </div>
                 <Badge
                   variant="secondary"
                   className="text-xs font-medium w-fit transition-all duration-300 group-hover/card:scale-105 backdrop-blur-sm"

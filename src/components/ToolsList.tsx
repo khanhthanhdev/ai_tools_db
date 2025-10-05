@@ -4,15 +4,20 @@ import { ToolCard } from "./ToolCard";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { Doc } from "../../convex/_generated/dataModel";
+
+type ToolWithScore = Doc<"aiTools"> & { _score?: number };
 
 interface ToolsListProps {
   searchTerm: string;
   selectedCategory: string;
   selectedPricing: string;
   language: "en" | "vi";
+  semanticResults?: ToolWithScore[];
+  isSemanticSearch?: boolean;
 }
 
 export function ToolsList({
@@ -20,6 +25,8 @@ export function ToolsList({
   selectedCategory,
   selectedPricing,
   language,
+  semanticResults,
+  isSemanticSearch = false,
 }: ToolsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE_MOBILE = 6;
@@ -28,10 +35,11 @@ export function ToolsList({
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCategory, selectedPricing]);
+  }, [searchTerm, selectedCategory, selectedPricing, isSemanticSearch]);
+  
   const searchResults = useQuery(
     api.aiTools.searchTools,
-    searchTerm
+    searchTerm && !isSemanticSearch
       ? {
           searchTerm,
           language,
@@ -43,7 +51,7 @@ export function ToolsList({
 
   const browseResults = useQuery(
     api.aiTools.listTools,
-    !searchTerm
+    !searchTerm && !isSemanticSearch
       ? {
           language,
           category: selectedCategory || undefined,
@@ -52,7 +60,12 @@ export function ToolsList({
       : "skip"
   );
 
-  const tools = searchTerm ? searchResults : browseResults;
+  // Use semantic results if provided, otherwise use keyword search or browse results
+  const tools = isSemanticSearch && semanticResults 
+    ? semanticResults 
+    : searchTerm 
+      ? searchResults 
+      : browseResults;
 
   // Use hook for responsive detection
   const [isMobile, setIsMobile] = useState(false);
@@ -186,6 +199,23 @@ export function ToolsList({
           </motion.div>
         )}
         
+        {/* Semantic search indicator */}
+        {isSemanticSearch && (
+          <motion.div
+            className="mb-4 flex items-center gap-2 text-sm text-muted-foreground"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span>
+              {language === "en" 
+                ? "Results ranked by semantic similarity" 
+                : "Kết quả được xếp hạng theo độ tương đồng ngữ nghĩa"}
+            </span>
+          </motion.div>
+        )}
+        
         <motion.div 
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           initial="hidden"
@@ -218,7 +248,8 @@ export function ToolsList({
             >
               <ToolCard 
                 tool={tool} 
-                language={language} 
+                language={language}
+                showScore={isSemanticSearch && '_score' in tool}
                 config={{ 
                   size: 'compact', 
                   layout: 'vertical' 
@@ -246,6 +277,23 @@ export function ToolsList({
 
   return (
     <div className="space-y-12">
+      {/* Semantic search indicator */}
+      {isSemanticSearch && (
+        <motion.div
+          className="flex items-center gap-2 text-sm text-muted-foreground"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Sparkles className="h-4 w-4 text-primary" />
+          <span>
+            {language === "en" 
+              ? "Results ranked by semantic similarity" 
+              : "Kết quả được xếp hạng theo độ tương đồng ngữ nghĩa"}
+          </span>
+        </motion.div>
+      )}
+      
       {categories.map((category, categoryIndex) => (
         <motion.div 
           key={category}
@@ -297,7 +345,8 @@ export function ToolsList({
               >
                 <ToolCard 
                   tool={tool} 
-                  language={language} 
+                  language={language}
+                  showScore={isSemanticSearch && '_score' in tool}
                   config={{ 
                     size: 'compact', 
                     layout: 'vertical' 

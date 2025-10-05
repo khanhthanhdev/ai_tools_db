@@ -49,6 +49,9 @@ const translations = {
     loading: "Searching...",
     resultsCount: "results",
     similarityScore: "Match",
+    errorTitle: "Search Error",
+    rateLimitError: "Too many searches. Please wait a moment and try again.",
+    genericError: "Search failed. Please try again.",
   },
   vi: {
     searchPlaceholder:
@@ -72,6 +75,9 @@ const translations = {
     loading: "Đang tìm kiếm...",
     resultsCount: "kết quả",
     similarityScore: "Khớp",
+    errorTitle: "Lỗi tìm kiếm",
+    rateLimitError: "Quá nhiều tìm kiếm. Vui lòng đợi một chút và thử lại.",
+    genericError: "Tìm kiếm thất bại. Vui lòng thử lại.",
   },
 };
 
@@ -86,6 +92,7 @@ export function SemanticSearchBar({
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ToolWithScore[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const semanticSearch = useAction(api.actions.semanticSearch);
   const hybridSearch = useAction(api.actions.hybridSearch);
@@ -102,6 +109,7 @@ export function SemanticSearchBar({
 
     setLoading(true);
     setHasSearched(true);
+    setError(null);
 
     try {
       const searchAction =
@@ -117,8 +125,17 @@ export function SemanticSearchBar({
 
       setResults(searchResults as ToolWithScore[]);
       onResultsChange?.(searchResults as ToolWithScore[]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Search failed:", error);
+      
+      // Check if it's a rate limit error
+      const errorMessage = error?.message || error?.toString() || "";
+      if (errorMessage.includes("Rate limit exceeded")) {
+        setError(errorMessage);
+      } else {
+        setError(t.genericError);
+      }
+      
       setResults([]);
       onResultsChange?.([]);
     } finally {
@@ -280,8 +297,27 @@ export function SemanticSearchBar({
         </motion.div>
       )}
 
+      {/* Error State */}
+      {!loading && error && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="rounded-lg border border-destructive/50 bg-destructive/10 p-4"
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
+              <span className="text-destructive text-xl">⚠️</span>
+            </div>
+            <div className="flex-1 space-y-1">
+              <h3 className="font-semibold text-destructive">{t.errorTitle}</h3>
+              <p className="text-sm text-destructive/90">{error}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Results */}
-      {!loading && hasSearched && (
+      {!loading && !error && hasSearched && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -4,9 +4,16 @@ import { motion } from "motion/react";
 import { FavouriteButton } from "@/components/ui/favourite-button";
 import ToolCardFlip from "@/components/kokonutui/tool-card-flip";
 
+type ToolWithScore = Doc<"aiTools"> & { _score?: number };
+
 interface ToolCardProps {
-  tool: Doc<"aiTools">;
+  tool: ToolWithScore;
   language: "en" | "vi";
+  showScore?: boolean;
+  config?: {
+    size?: 'compact' | 'default';
+    layout?: 'vertical' | 'horizontal';
+  };
 }
 
 const pricingLabels = {
@@ -40,7 +47,7 @@ const pricingVariants = {
   },
 } as const;
 
-export function ToolCard({ tool, language }: ToolCardProps) {
+export function ToolCard({ tool, language, showScore = false, config }: ToolCardProps) {
   const pricingStyle = pricingVariants[tool.pricing];
   const description = tool.description;
   const averageRating = tool.averageRating ?? 0;
@@ -62,6 +69,9 @@ export function ToolCard({ tool, language }: ToolCardProps) {
       </div>
     </motion.div>
   ) : undefined;
+  
+  // Calculate similarity score percentage
+  const similarityScore = tool._score !== undefined ? Math.round(tool._score * 100) : undefined;
 
   return (
     <motion.div
@@ -86,6 +96,7 @@ export function ToolCard({ tool, language }: ToolCardProps) {
         pricingLabel={pricingLabels[language][tool.pricing]}
         favouriteButton={<FavouriteButton toolId={tool._id} />}
         trendingIndicator={trendingIndicator}
+        similarityScore={showScore ? similarityScore : undefined}
       />
     </motion.div>
   );
