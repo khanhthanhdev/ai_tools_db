@@ -290,7 +290,7 @@ export const semanticSearch = action({
     pricing: v.optional(v.union(v.literal("free"), v.literal("freemium"), v.literal("paid"))),
   },
   handler: async (ctx, args): Promise<any[]> => {
-    const limit = args.limit || 20;
+    const limit = args.limit || 10;
     const trimmedQuery = args.query.trim();
 
     // Validate query
@@ -478,7 +478,7 @@ export const hybridSearch = action({
     pricing: v.optional(v.union(v.literal("free"), v.literal("freemium"), v.literal("paid"))),
   },
   handler: async (ctx, args): Promise<any[]> => {
-    const limit = args.limit || 20;
+    const limit = args.limit || 10;
     const trimmedQuery = args.query.trim();
 
     // Validate query
@@ -511,7 +511,7 @@ export const hybridSearch = action({
         // Semantic search with higher limit to ensure good coverage
         ctx.runAction(api.actions.semanticSearch, {
           query: trimmedQuery,
-          limit: limit * 2, // Get more results to have better selection after merging
+          limit: limit, // Get more results to have better selection after merging
           language: args.language,
           category: args.category,
           pricing: args.pricing,
