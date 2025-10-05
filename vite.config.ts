@@ -91,6 +91,8 @@ window.addEventListener('message', async (message) => {
         replacement: path.resolve(__dirname, "./src"),
       },
     ],
+    // Ensure only one copy of React is used
+    dedupe: ["react", "react-dom", "react-is"],
   },
 
   // Server optimizations
@@ -139,72 +141,48 @@ window.addEventListener('message', async (message) => {
         entryFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
 
-        // Improved manual chunks strategy
+        // Simplified manual chunks strategy to avoid React duplication issues
         manualChunks(id) {
           // Don't split app code
           if (!id.includes("node_modules")) {
             return undefined;
           }
 
-          // CRITICAL: Keep React in the main vendor chunk to avoid duplication issues
-          // React must be available before any React-dependent libraries load
+          // Group 1: React ecosystem (MUST stay together)
+          // This includes React, ReactDOM, and all React-dependent UI libraries
           if (
             id.includes("/react/") || 
             id.includes("/react-dom/") || 
             id.includes("/react-is/") ||
-            id.includes("/scheduler/")
+            id.includes("/scheduler/") ||
+            id.includes("/@radix-ui/") ||
+            id.includes("/react-hook-form/") ||
+            id.includes("/sonner/")
           ) {
-            return "vendor";
+            return "react-vendor";
           }
 
-          // React Router
+          // Group 2: React Router (separate for code splitting)
           if (id.includes("/react-router")) {
             return "router";
           }
 
-          // Motion/animations (large library)
+          // Group 3: Motion/animations (large, can be lazy loaded)
           if (id.includes("/motion/") || id.includes("/framer-motion/")) {
             return "motion";
           }
 
-          // Convex (backend SDK)
+          // Group 4: Convex backend SDK
           if (id.includes("/convex/") || id.includes("/@convex-dev/")) {
             return "convex";
           }
 
-          // Radix UI (depends on React, keep separate)
-          if (id.includes("/@radix-ui/")) {
-            return "radix";
-          }
-
-          // Form handling
-          if (id.includes("/react-hook-form/") || id.includes("/zod/") || id.includes("/@hookform/")) {
-            return "forms";
-          }
-
-          // Charts (large library)
+          // Group 5: Charts (large library, often lazy loaded)
           if (id.includes("/recharts/") || id.includes("/d3-")) {
             return "charts";
           }
 
-          // Icons (frequently used)
-          if (id.includes("/lucide-react/")) {
-            return "icons";
-          }
-
-          // Small utilities (group together)
-          if (
-            id.includes("/sonner/") ||
-            id.includes("/tailwind-merge/") ||
-            id.includes("/clsx/") ||
-            id.includes("/class-variance-authority/") ||
-            id.includes("/date-fns/") ||
-            id.includes("/embla-carousel/")
-          ) {
-            return "utils";
-          }
-
-          // Everything else goes to vendor (including React)
+          // Group 6: Everything else (utilities, icons, etc.)
           return "vendor";
         },
       },

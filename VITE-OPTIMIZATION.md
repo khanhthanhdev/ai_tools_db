@@ -13,17 +13,14 @@
 
 ### 3. Improved Code Splitting Strategy
 - Consolidated related libraries into logical chunks
-- Reduced number of chunks from 15+ to 8 optimized chunks:
-  - `react-core`: React + ReactDOM + Scheduler
+- **CRITICAL**: React + Radix UI bundled together to prevent forwardRef errors
+- Reduced number of chunks to 6 optimized chunks:
+  - `react-vendor`: React + ReactDOM + Radix UI + React Hook Form + Sonner (must stay together)
   - `router`: React Router
   - `motion`: Animation library
   - `convex`: Backend SDK
-  - `radix`: All Radix UI components
-  - `forms`: Form handling libraries
   - `charts`: Recharts + D3
-  - `icons`: Lucide icons
-  - `utils`: Small utility libraries
-  - `vendor`: Everything else
+  - `vendor`: Everything else (icons, utilities, etc.)
 
 ### 4. Build Optimizations
 - Target ES2020 for smaller bundles
