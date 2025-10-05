@@ -69,10 +69,6 @@ window.addEventListener('message', async (message) => {
             return "router-vendor";
           }
 
-          if (id.includes("@radix-ui")) {
-            return "radix-vendor";
-          }
-
           if (id.includes("framer-motion") || id.includes(`${path.sep}motion${path.sep}`)) {
             return "motion-vendor";
           }
