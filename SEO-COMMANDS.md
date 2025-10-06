@@ -39,13 +39,13 @@ npx lighthouse https://your-domain.com/about-us --view
 
 ```powershell
 # Update index.html
-(Get-Content index.html) -replace 'https://yourdomain.com', 'https://your-actual-domain.com' | Set-Content index.html
+(Get-Content index.html) -replace 'https://aiknowledgecloud.vercel.app', 'https://your-actual-domain.com' | Set-Content index.html
 
 # Update sitemap generator
-(Get-Content scripts/generate-sitemap.mjs) -replace 'https://yourdomain.com', 'https://your-actual-domain.com' | Set-Content scripts/generate-sitemap.mjs
+(Get-Content scripts/generate-sitemap.mjs) -replace 'https://aiknowledgecloud.vercel.app', 'https://your-actual-domain.com' | Set-Content scripts/generate-sitemap.mjs
 
 # Update robots.txt
-(Get-Content public/robots.txt) -replace 'https://yourdomain.com', 'https://your-actual-domain.com' | Set-Content public/robots.txt
+(Get-Content public/robots.txt) -replace 'https://aiknowledgecloud.vercel.app', 'https://your-actual-domain.com' | Set-Content public/robots.txt
 ```
 
 ## Validation

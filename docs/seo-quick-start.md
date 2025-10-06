@@ -7,7 +7,7 @@ Your AI Tools Database now has comprehensive SEO optimizations for better crawla
 ## Immediate Actions Required
 
 ### 1. Update Your Domain (CRITICAL)
-Replace `https://yourdomain.com` with your actual domain in these files:
+Replace `https://aiknowledgecloud.vercel.app` with your actual domain in these files:
 
 - `index.html` (lines with og:url, twitter:url, canonical)
 - `scripts/generate-sitemap.mjs` (DOMAIN constant)
@@ -16,9 +16,9 @@ Replace `https://yourdomain.com` with your actual domain in these files:
 **Find and replace**:
 ```bash
 # Windows PowerShell
-(Get-Content index.html) -replace 'https://yourdomain.com', 'https://your-actual-domain.com' | Set-Content index.html
-(Get-Content scripts/generate-sitemap.mjs) -replace 'https://yourdomain.com', 'https://your-actual-domain.com' | Set-Content scripts/generate-sitemap.mjs
-(Get-Content public/robots.txt) -replace 'https://yourdomain.com', 'https://your-actual-domain.com' | Set-Content public/robots.txt
+(Get-Content index.html) -replace 'https://aiknowledgecloud.vercel.app', 'https://your-actual-domain.com' | Set-Content index.html
+(Get-Content scripts/generate-sitemap.mjs) -replace 'https://aiknowledgecloud.vercel.app', 'https://your-actual-domain.com' | Set-Content scripts/generate-sitemap.mjs
+(Get-Content public/robots.txt) -replace 'https://aiknowledgecloud.vercel.app', 'https://your-actual-domain.com' | Set-Content public/robots.txt
 ```
 
 ### 2. Generate Sitemap

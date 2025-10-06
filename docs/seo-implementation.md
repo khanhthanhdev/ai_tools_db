@@ -182,19 +182,19 @@ Each page should have unique:
 ### Manual Testing
 ```bash
 # Test robots.txt
-curl https://yourdomain.com/robots.txt
+curl https://aiknowledgecloud.vercel.app/robots.txt
 
 # Test sitemap
-curl https://yourdomain.com/sitemap.xml
+curl https://aiknowledgecloud.vercel.app/sitemap.xml
 
 # Test meta tags
-curl -s https://yourdomain.com | grep -i "meta"
+curl -s https://aiknowledgecloud.vercel.app | grep -i "meta"
 ```
 
 ### Lighthouse Audit
 ```bash
 npm install -g lighthouse
-lighthouse https://yourdomain.com --view
+lighthouse https://aiknowledgecloud.vercel.app --view
 ```
 
 ## Advanced: Server-Side Rendering (SSR)
@@ -243,7 +243,7 @@ For optimal SEO, consider implementing SSR:
 ## Configuration Updates Needed
 
 ### 1. Update Domain
-Replace `https://yourdomain.com` in:
+Replace `https://aiknowledgecloud.vercel.app` in:
 - `index.html` (meta tags)
 - `scripts/generate-sitemap.mjs`
 - `public/robots.txt`
@@ -254,7 +254,7 @@ Replace `https://yourdomain.com` in:
   "scripts": {
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
     "prebuild": "npm run generate:sitemap",
-    "seo:test": "lighthouse https://yourdomain.com --view"
+    "seo:test": "lighthouse https://aiknowledgecloud.vercel.app --view"
   }
 }
 ```
@@ -262,7 +262,7 @@ Replace `https://yourdomain.com` in:
 ### 3. Environment Variables
 Add to `.env.local`:
 ```
-VITE_SITE_URL=https://yourdomain.com
+VITE_SITE_URL=https://aiknowledgecloud.vercel.app
 VITE_SITE_NAME=AI Tools Database
 ```
 
