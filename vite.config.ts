@@ -182,9 +182,13 @@ window.addEventListener('message', async (message) => {
           }
 
           // Charts library (large and usually lazy loaded)
-          if (id.includes("/recharts/") || id.includes("/d3-")) {
-            return "charts";
-          }
+          // NOTE: Temporarily disable the dedicated charts chunk because it created a
+          // circular dependency with the react-vendor chunk, leading to runtime errors
+          // (React being undefined when loaded). Keep the logic here in case we want to
+          // restore it once the chunking strategy is revisited.
+          // if (id.includes("/recharts/") || id.includes("/d3-")) {
+          //   return "charts";
+          // }
 
           // Motion library (large animation library) - defer loading
           if (id.includes("/motion/") || id.includes("/framer-motion/")) {

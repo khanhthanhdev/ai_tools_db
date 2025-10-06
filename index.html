@@ -12,9 +12,6 @@
     <!-- Optimize font loading -->
     <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
     
-    <!-- Prefetch critical routes -->
-    <link rel="prefetch" href="/add-tool">
-    <link rel="prefetch" href="/favourites">
     
     <!-- Critical CSS will be inlined here by Vite -->
     <link rel="stylesheet" href="/src/index.css" />
@@ -60,21 +57,5 @@
     <div id="root"></div>
     <!-- Load main script with optimized loading -->
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Preload critical chunks that will be needed soon -->
-    <script>
-      // Preload critical routes for faster navigation
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => {
-          const routes = ['/add-tool', '/favourites'];
-          routes.forEach(route => {
-            const link = document.createElement('link');
-            link.rel = 'prefetch';
-            link.href = route;
-            document.head.appendChild(link);
-          });
-        });
-      }
-    </script>
   </body>
 </html>
