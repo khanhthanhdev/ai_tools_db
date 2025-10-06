@@ -157,7 +157,7 @@ export const listToolsPaginated = query({
 
     // Use cursor-based pagination for better performance
     const result = await query.order("desc").paginate(args.paginationOpts);
-    
+
     return {
       page: result.page,
       nextCursor: result.continueCursor,
@@ -202,7 +202,7 @@ export const searchToolsPaginated = query({
 
     // Use cursor-based pagination for search results
     const result = await searchQuery.paginate(args.paginationOpts);
-    
+
     return {
       page: result.page,
       nextCursor: result.continueCursor,
@@ -517,15 +517,15 @@ export const updateTool = mutation({
     const nameChanged = trimmedName !== existingTool.name;
     const descriptionChanged = args.description.trim() !== existingTool.description;
     const categoryChanged = args.category.trim() !== existingTool.category;
-    
+
     // Compare tags arrays (order-independent comparison)
     const existingTagsSet = new Set(existingTool.tags);
     const newTagsSet = new Set(cleanTags);
-    const tagsChanged = 
+    const tagsChanged =
       existingTagsSet.size !== newTagsSet.size ||
       ![...existingTagsSet].every(tag => newTagsSet.has(tag));
 
-    const shouldRegenerateEmbedding = 
+    const shouldRegenerateEmbedding =
       nameChanged || descriptionChanged || categoryChanged || tagsChanged;
 
     // Update the tool
@@ -821,7 +821,7 @@ export const getSimilarTools = query({
 
     // Get the source tool
     const sourceTool = await ctx.db.get(args.toolId);
-    
+
     // If tool doesn't exist or doesn't have an embedding, return empty array
     if (
       !sourceTool ||

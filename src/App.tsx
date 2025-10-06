@@ -29,16 +29,14 @@ const AboutUsPage = lazy(() =>
 
 type Language = "en" | "vi";
 
-export default function App() {
+function AppContent() {
   const [language, setLanguage] = useState<Language>("en");
   
   // Enable route-based prefetching for authenticated users
   useRoutePrefetch();
 
   return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <Layout language={language} setLanguage={setLanguage}>
+    <Layout language={language} setLanguage={setLanguage}>
           <Routes>
             <Route path="/" element={<BrowsePage language={language} />} />
             <Route
@@ -83,6 +81,14 @@ export default function App() {
             />
           </Routes>
         </Layout>
+  );
+}
+
+export default function App() {
+  return (
+    <HelmetProvider>
+      <BrowserRouter>
+        <AppContent />
       </BrowserRouter>
       <Analytics />
     </HelmetProvider>
