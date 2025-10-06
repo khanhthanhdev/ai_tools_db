@@ -1,31 +1,18 @@
-import { writeFileSync, readFileSync } from "fs";
+import { writeFileSync } from "fs";
 import { ConvexHttpClient } from "convex/browser";
+import dotenv from "dotenv";
 import { api } from "../convex/_generated/api.js";
 
-
-// Load environment variables from .env.local
-function loadEnvFile() {
-  try {
-    const envContent = readFileSync(".env.local", "utf-8");
-    const lines = envContent.split("\n");
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith("#")) {
-        const [key, ...valueParts] = trimmed.split("=");
-        if (key && valueParts.length > 0) {
-          const value = valueParts.join("=").trim();
-          process.env[key.trim()] = value;
-        }
-      }
-    }
-  } catch (error) {
-    console.warn("Warning: Could not load .env.local file");
-  }
+// Load baseline env vars, then apply local overrides
+const baseEnv = dotenv.config();
+if (baseEnv.error && baseEnv.error.code !== "ENOENT") {
+  console.warn("Warning: Could not load .env file");
 }
 
-// Load environment variables
-loadEnvFile();
+const localEnv = dotenv.config({ path: ".env.local", override: true });
+if (localEnv.error && localEnv.error.code !== "ENOENT") {
+  console.warn("Warning: Could not load .env.local file");
+}
 
 const DOMAIN = process.env.VITE_WEBSITE_URL;
 // Initialize Convex client
