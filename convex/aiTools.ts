@@ -167,6 +167,99 @@ export const listToolsPaginated = query({
 });
 
 /**
+ * Offset-based paginated version of listTools for page-based navigation
+ * Better for traditional pagination (page 1, 2, 3...)
+ */
+export const listToolsWithOffset = query({
+  args: {
+    language: v.optional(v.union(v.literal("en"), v.literal("vi"))),
+    category: v.optional(v.string()),
+    pricing: v.optional(v.union(v.literal("free"), v.literal("freemium"), v.literal("paid"))),
+    offset: v.number(),
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db.query("aiTools").filter((q) => q.eq(q.field("isApproved"), true));
+
+    if (args.language) {
+      query = query.filter((q) => q.eq(q.field("language"), args.language));
+    }
+    if (args.category) {
+      query = query.filter((q) => q.eq(q.field("category"), args.category));
+    }
+    if (args.pricing) {
+      query = query.filter((q) => q.eq(q.field("pricing"), args.pricing));
+    }
+
+    // Get total count for pagination info
+    const allTools = await query.collect();
+    const totalCount = allTools.length;
+
+    // Sort by name in ascending order
+    const sortedTools = allTools.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Apply offset and limit
+    const tools = sortedTools.slice(args.offset, args.offset + args.limit);
+
+    return {
+      tools,
+      totalCount,
+      hasMore: args.offset + args.limit < totalCount,
+    };
+  },
+});
+
+/**
+ * Offset-based paginated version of searchTools for page-based navigation
+ * Better for traditional pagination (page 1, 2, 3...)
+ */
+export const searchToolsWithOffset = query({
+  args: {
+    searchTerm: v.string(),
+    language: v.optional(v.union(v.literal("en"), v.literal("vi"))),
+    category: v.optional(v.string()),
+    pricing: v.optional(v.union(v.literal("free"), v.literal("freemium"), v.literal("paid"))),
+    offset: v.number(),
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const searchQuery = ctx.db
+      .query("aiTools")
+      .withSearchIndex("search_tools", (q) => {
+        let query = q.search("name", args.searchTerm).eq("isApproved", true);
+
+        if (args.language) {
+          query = query.eq("language", args.language);
+        }
+        if (args.category) {
+          query = query.eq("category", args.category);
+        }
+        if (args.pricing) {
+          query = query.eq("pricing", args.pricing);
+        }
+
+        return query;
+      });
+
+    // Get all search results first (search results are usually limited anyway)
+    const allResults = await searchQuery.collect();
+    const totalCount = allResults.length;
+
+    // Sort by name for consistent ordering
+    const sortedResults = allResults.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Apply offset and limit
+    const tools = sortedResults.slice(args.offset, args.offset + args.limit);
+
+    return {
+      tools,
+      totalCount,
+      hasMore: args.offset + args.limit < totalCount,
+    };
+  },
+});
+
+/**
  * Paginated version of searchTools for better performance
  * Uses cursor-based pagination to efficiently load search results
  */
@@ -760,7 +853,7 @@ export const vectorSearch = query({
       .collect();
 
     // Filter tools that have embeddings and match optional filters
-    let filteredTools = allTools.filter((tool) => {
+    const filteredTools = allTools.filter((tool) => {
       // Must have valid embedding
       if (!tool.embedding || tool.embedding.length !== GEMINI_EMBEDDING_DIMENSIONS) {
         return false;

@@ -222,59 +222,7 @@ export const batchPrefetch = {
   },
 };
 
-/**
- * Viewport-based prefetching with intersection observer
- */
-export class ViewportPrefetcher {
-  private observer: IntersectionObserver;
-  private convex: ConvexClient;
-  private prefetchedCategories = new Set<string>();
 
-  constructor(convex: ConvexClient) {
-    this.convex = convex;
-    this.observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            this.handleIntersection(entry.target);
-          }
-        });
-      },
-      {
-        rootMargin: '200px', // Prefetch 200px before element enters viewport
-        threshold: 0.1,
-      }
-    );
-  }
-
-  private async handleIntersection(element: Element) {
-    const category = element.getAttribute('data-category');
-    const language = element.getAttribute('data-language') as 'en' | 'vi' | undefined;
-
-    if (category && !this.prefetchedCategories.has(category)) {
-      this.prefetchedCategories.add(category);
-
-      // Prefetch tools for this category
-      await prefetchTools.paginatedList(this.convex, {
-        category,
-        language,
-      });
-    }
-  }
-
-  observe(element: Element) {
-    this.observer.observe(element);
-  }
-
-  unobserve(element: Element) {
-    this.observer.unobserve(element);
-  }
-
-  disconnect() {
-    this.observer.disconnect();
-    this.prefetchedCategories.clear();
-  }
-}
 
 /**
  * Debounced hover prefetch utility

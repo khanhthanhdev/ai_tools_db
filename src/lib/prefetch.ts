@@ -75,47 +75,7 @@ export const prefetchTools = {
     });
   },
 
-  /**
-   * Prefetch next category when current category is approaching viewport
-   */
-  nextCategory: async (
-    queryClient: QueryClient,
-    convex: ConvexReactClient,
-    nextCategory: string,
-    filters: {
-      language?: 'en' | 'vi';
-      pricing?: 'free' | 'freemium' | 'paid';
-    }
-  ) => {
-    const categoryFilters = {
-      ...filters,
-      category: nextCategory,
-    };
 
-    // Check if already cached
-    const queryKey = queryKeys.tools.paginatedList(categoryFilters);
-    const cachedData = queryClient.getQueryData(queryKey);
-
-    if (!cachedData) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Prefetching next category: ${nextCategory}`);
-      }
-
-      await queryClient.prefetchQuery({
-        queryKey,
-        queryFn: () => convex.query(api.aiTools.listToolsPaginated, {
-          ...categoryFilters,
-          paginationOpts: {
-            numItems: 20,
-            cursor: null,
-          },
-        }),
-        staleTime: 5 * 60 * 1000, // 5 minutes
-      });
-    } else if (process.env.NODE_ENV === 'development') {
-      console.log(`Category already cached: ${nextCategory}`);
-    }
-  },
 
   /**
    * Prefetch data when user is authenticated (for route navigation)

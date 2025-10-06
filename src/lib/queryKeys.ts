@@ -36,12 +36,13 @@ export const queryKeys = {
       pricing?: 'free' | 'freemium' | 'paid';
     }) => [...queryKeys.tools.lists(), filters] as const,
     
-    // Paginated list queries (for infinite scroll)
+    // Paginated list queries (for pagination)
     paginatedLists: () => [...queryKeys.tools.all, 'paginatedList'] as const,
     paginatedList: (filters: {
       language?: 'en' | 'vi';
       category?: string;
       pricing?: 'free' | 'freemium' | 'paid';
+      page?: number;
     }) => [...queryKeys.tools.paginatedLists(), filters] as const,
     
     // Search queries (keyword search)
@@ -53,13 +54,14 @@ export const queryKeys = {
       pricing?: 'free' | 'freemium' | 'paid';
     }) => [...queryKeys.tools.searches(), params] as const,
     
-    // Paginated search queries (for infinite scroll)
+    // Paginated search queries (for pagination)
     paginatedSearches: () => [...queryKeys.tools.all, 'paginatedSearch'] as const,
     paginatedSearch: (params: {
       searchTerm: string;
       language?: 'en' | 'vi';
       category?: string;
       pricing?: 'free' | 'freemium' | 'paid';
+      page?: number;
     }) => [...queryKeys.tools.paginatedSearches(), params] as const,
     
     // Vector/semantic search queries
