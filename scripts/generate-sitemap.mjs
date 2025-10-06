@@ -19,7 +19,7 @@ const DOMAIN = process.env.VITE_WEBSITE_URL;
 const convexUrl = process.env.VITE_CONVEX_URL || process.env.CONVEX_URL;
 if (!convexUrl) {
   console.error("Error: CONVEX_URL or VITE_CONVEX_URL environment variable is not set");
-  console.error("Please ensure .env.local exists with VITE_CONVEX_URL defined");
+  console.error("Please ensure the environment variable is set in your deployment platform (Vercel) or .env.local exists for local development");
   process.exit(1);
 }
 

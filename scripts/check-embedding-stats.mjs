@@ -7,12 +7,22 @@
 import { ConvexHttpClient } from "convex/browser";
 import dotenv from "dotenv";
 
-dotenv.config({ path: ".env.local" });
+// Load baseline env vars, then apply local overrides
+const baseEnv = dotenv.config();
+if (baseEnv.error && baseEnv.error.code !== "ENOENT") {
+  console.warn("Warning: Could not load .env file");
+}
+
+const localEnv = dotenv.config({ path: ".env.local", override: true });
+if (localEnv.error && localEnv.error.code !== "ENOENT") {
+  console.warn("Warning: Could not load .env.local file");
+}
 
 const CONVEX_URL = process.env.VITE_CONVEX_URL;
 
 if (!CONVEX_URL) {
-  console.error("❌ Error: VITE_CONVEX_URL not found in .env.local");
+  console.error("❌ Error: VITE_CONVEX_URL not found in environment variables");
+  console.error("Please ensure VITE_CONVEX_URL is set in your deployment platform or .env.local for local development");
   process.exit(1);
 }
 

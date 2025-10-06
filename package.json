@@ -12,7 +12,9 @@
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
     "analyze": "node scripts/analyze-bundle.mjs",
     "build:analyze": "npm run build && npm run analyze",
-    "lint": "tsc -p convex -noEmit --pretty false && tsc -p . -noEmit --pretty false && convex dev --once && vite build"
+    "lint": "tsc -p convex -noEmit --pretty false && tsc -p . -noEmit --pretty false && convex dev --once && vite build",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "preview": "wrangler pages dev dist"
   },
   "dependencies": {
     "@auth/core": "^0.40.0",
@@ -93,6 +95,7 @@
     "tailwindcss": "~3",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "wrangler": "^4.42.0"
   }
 }
