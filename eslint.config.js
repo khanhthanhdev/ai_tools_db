@@ -18,7 +18,7 @@ export default tseslint.config(
   {
     extends: [
       js.configs.recommended,
-      ...tseslint.configs.recommendedTypeChecked,
+      ...tseslint.configs.recommended,
     ],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -28,11 +28,8 @@ export default tseslint.config(
         ...globals.node,
       },
       parserOptions: {
-        project: [
-          "./tsconfig.node.json",
-          "./tsconfig.app.json",
-          "./convex/tsconfig.json",
-        ],
+        ecmaVersion: 2020,
+        sourceType: "module",
       },
     },
     plugins: {

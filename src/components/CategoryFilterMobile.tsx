@@ -1,5 +1,6 @@
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+import { queryKeys } from "@/lib/queryKeys";
 import { Badge } from "./ui/badge";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { motion } from "motion/react";
@@ -22,7 +23,11 @@ export function CategoryFilterMobile({
   language,
   translations: t,
 }: CategoryFilterMobileProps) {
-  const categories = useQuery(api.aiTools.getCategories, { language }) || [];
+  const { data: categories = [] } = useConvexQuery(
+    api.aiTools.getCategories, 
+    { language },
+    { queryKey: queryKeys.tools.categories(language) }
+  );
 
   const pricingOptions = [
     { value: "", label: t.all, icon: "🌟" },

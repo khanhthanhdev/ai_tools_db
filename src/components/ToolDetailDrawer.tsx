@@ -1,7 +1,8 @@
 import * as React from "react";
 import { Doc } from "../../convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+import { useConvexMutation } from "@/hooks/useConvexMutation";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import { ExternalLink } from "lucide-react";
@@ -105,8 +106,8 @@ const pricingLabels = {
 };
 
 export function ToolDetailDrawer({ tool, language, children }: ToolDetailDrawerProps) {
-  const user = useQuery(api.auth.loggedInUser);
-  const createReview = useMutation(api.reviews.createReview);
+  const { data: user } = useConvexQuery(api.auth.loggedInUser, {});
+  const createReview = useConvexMutation(api.reviews.createReview);
   const [userRating, setUserRating] = React.useState<number | null>(null);
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -125,7 +126,7 @@ export function ToolDetailDrawer({ tool, language, children }: ToolDetailDrawerP
     }
 
     try {
-      await createReview({
+      await createReview.mutateAsync({
         toolId: tool._id,
         rating,
         reviewText: undefined,

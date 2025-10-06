@@ -4,6 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { Layout } from "./components/Layout";
 import { BrowsePage } from "./pages/BrowsePage";
 import { Analytics } from "@vercel/analytics/react";
+import { useRoutePrefetch } from "./hooks/useRoutePrefetch";
 const AddToolPage = lazy(() =>
   import("./pages/AddToolPage").then((module) => ({
     default: module.AddToolPage,
@@ -30,6 +31,9 @@ type Language = "en" | "vi";
 
 export default function App() {
   const [language, setLanguage] = useState<Language>("en");
+  
+  // Enable route-based prefetching for authenticated users
+  useRoutePrefetch();
 
   return (
     <HelmetProvider>

@@ -1,4 +1,3 @@
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { ToolCard } from "./ToolCard";
 import { ToolCardSkeletonGrid } from "./ToolCardSkeleton";
@@ -6,11 +5,16 @@ import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "motion/react";
 import { Doc, Id } from "../../convex/_generated/dataModel";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { useConvexInfiniteQuery } from "@/hooks/useConvexInfiniteQuery";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+
+import { queryKeys } from "@/lib/queryKeys";
+import { useViewportPrefetch } from "@/hooks/useViewportPrefetch";
 
 type ToolWithScore = Doc<"aiTools"> & { _score?: number };
 
@@ -34,16 +38,9 @@ export function ToolsList({
   useInfiniteScrollMode = true, // Default to infinite scroll for better UX
 }: ToolsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [loadedPages, setLoadedPages] = useState(1); // For infinite scroll
-  const ITEMS_PER_PAGE_MOBILE = 6;
-  const ITEMS_PER_PAGE_DESKTOP = 12;
-  const INITIAL_LOAD = 8; // Load fewer items initially for faster first paint
-
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-    setLoadedPages(1);
-  }, [searchTerm, selectedCategory, selectedPricing, isSemanticSearch]);
+  const ITEMS_PER_PAGE_MOBILE = 12;
+  const ITEMS_PER_PAGE_DESKTOP = 20;
+  const PAGE_SIZE = 20; // Server-side page size
 
   // Use hook for responsive detection
   const [isMobile, setIsMobile] = useState(false);
@@ -58,75 +55,185 @@ export function ToolsList({
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
-  const searchResults = useQuery(
-    api.aiTools.searchTools,
-    searchTerm && !isSemanticSearch
-      ? {
-          searchTerm,
-          language,
-          category: selectedCategory || undefined,
-          pricing: selectedPricing as any || undefined,
-        }
-      : "skip"
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, selectedPricing, isSemanticSearch]);
+
+
+
+  // Infinite query for search results (when searching)
+  const searchInfiniteQuery = useConvexInfiniteQuery(
+    api.aiTools.searchToolsPaginated,
+    (pageParam) => {
+      if (!searchTerm || isSemanticSearch) return 'skip';
+      
+      const args = {
+        searchTerm,
+        language,
+        category: selectedCategory || undefined,
+        pricing: selectedPricing as any || undefined,
+        paginationOpts: {
+          numItems: PAGE_SIZE,
+          cursor: pageParam as string | null,
+        },
+      };
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Search pagination args:', args);
+      }
+      
+      return args;
+    },
+    {
+      enabled: Boolean(searchTerm && !isSemanticSearch),
+      staleTime: 2 * 60 * 1000, // 2 minutes
+    }
   );
 
-  const browseResults = useQuery(
-    api.aiTools.listTools,
-    !searchTerm && !isSemanticSearch
-      ? {
-          language,
-          category: selectedCategory || undefined,
-          pricing: selectedPricing as any || undefined,
-        }
-      : "skip"
+  // Infinite query for browse results (when not searching)
+  const browseInfiniteQuery = useConvexInfiniteQuery(
+    api.aiTools.listToolsPaginated,
+    (pageParam) => {
+      if (searchTerm || isSemanticSearch) return 'skip';
+      
+      const args = {
+        language,
+        category: selectedCategory || undefined,
+        pricing: selectedPricing as any || undefined,
+        paginationOpts: {
+          numItems: PAGE_SIZE,
+          cursor: pageParam as string | null,
+        },
+      };
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Browse pagination args:', args);
+      }
+      
+      return args;
+    },
+    {
+      enabled: Boolean(!searchTerm && !isSemanticSearch),
+      staleTime: 5 * 60 * 1000, // 5 minutes for browse results
+    }
   );
 
-  // Batch fetch all favourite IDs once instead of per-tool
-  const favouriteIds = useQuery(api.favourites.getUserFavouriteIds);
+  // Separate query for favourites (smaller dataset, doesn't need pagination)
+  const favouritesQuery = useConvexQuery(
+    api.favourites.getUserFavouriteIds,
+    {},
+    {
+      queryKey: queryKeys.favourites.ids(),
+      staleTime: 10 * 60 * 1000, // 10 minutes
+    }
+  );
+
+  const favouriteIds = favouritesQuery.data;
   const favouriteIdsSet = useMemo(
     () => new Set(favouriteIds || []),
     [favouriteIds]
   );
 
-  // Use semantic results if provided, otherwise use keyword search or browse results
+  // Determine which query to use based on current mode
+  const activeQuery = searchTerm && !isSemanticSearch ? searchInfiniteQuery : browseInfiniteQuery;
+  
+  // Flatten all pages into a single array
   const allTools = isSemanticSearch && semanticResults 
     ? semanticResults 
-    : searchTerm 
-      ? searchResults 
-      : browseResults;
+    : activeQuery.data?.pages.flatMap(page => page.page) ?? [];
 
-  // Client-side pagination for infinite scroll
+  // Calculate categories for viewport prefetch (needed for hook)
+  const toolsByCategory = allTools.reduce((acc, tool) => {
+    if (!acc[tool.category]) {
+      acc[tool.category] = [];
+    }
+    acc[tool.category].push(tool);
+    return acc;
+  }, {} as Record<string, typeof allTools>);
+
+  const categories = Object.keys(toolsByCategory).sort();
+
+  // Initialize viewport prefetch for categories (always call hook)
+  const { observeCategory } = useViewportPrefetch({
+    categories,
+    filters: {
+      language,
+      pricing: selectedPricing as 'free' | 'freemium' | 'paid' | undefined,
+    },
+    enabled: !isSemanticSearch && !searchTerm && !isMobile && !selectedCategory, // Only enable for desktop browse mode
+  });
+
+  // Development logging for pagination performance
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && activeQuery.data) {
+      const totalPages = activeQuery.data.pages.length;
+      const totalItems = allTools.length;
+      console.log(`Pagination stats: ${totalPages} pages loaded, ${totalItems} total items`);
+    }
+  }, [activeQuery.data, allTools.length]);
+
+  // Extract loading states
+  const isLoading = activeQuery.isLoading;
+  const isFetching = activeQuery.isFetching;
+  const error = activeQuery.error;
+  const hasNextPage = activeQuery.hasNextPage;
+  const isFetchingNextPage = activeQuery.isFetchingNextPage;
+  const fetchNextPage = activeQuery.fetchNextPage;
+
+  // Client-side pagination for non-infinite scroll mode
   const itemsPerPage = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
-  const itemsToShow = useInfiniteScrollMode ? INITIAL_LOAD * loadedPages : itemsPerPage;
-  const tools = allTools?.slice(0, itemsToShow);
+  const tools = useInfiniteScrollMode ? allTools : allTools;
   
-  const toolsData = allTools ? {
-    tools: tools || [],
-    total: allTools.length,
-    hasMore: (tools?.length || 0) < allTools.length,
-  } : undefined;
-
-  // Infinite scroll logic
+  // Infinite scroll logic - fetch next page from server
   const handleLoadMore = () => {
-    if (toolsData?.hasMore && !isSemanticSearch) {
-      setLoadedPages(prev => prev + 1);
+    if (hasNextPage && !isFetchingNextPage && !isSemanticSearch) {
+      fetchNextPage();
     }
   };
+  
+  // Background refetch indicator: show when fetching but not initial loading
+  const isBackgroundRefetch = isFetching && !isLoading && allTools.length > 0;
 
   const sentinelRef = useInfiniteScroll({
     onLoadMore: handleLoadMore,
-    hasMore: toolsData?.hasMore ?? false,
-    isLoading: toolsData === undefined,
+    hasMore: hasNextPage ?? false,
+    isLoading: isFetchingNextPage,
     threshold: 300,
   });
 
   // Pagination logic (for non-infinite scroll mode)
-  const totalPages = allTools ? Math.ceil(allTools.length / itemsPerPage) : 0;
+  const totalPages = Math.ceil(allTools.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedTools = useInfiniteScrollMode ? tools : allTools?.slice(startIndex, endIndex);
+  const paginatedTools = useInfiniteScrollMode ? tools : allTools.slice(startIndex, endIndex);
 
-  if (toolsData === undefined) {
+  // Handle error state
+  if (error) {
+    return (
+      <Card className="mx-auto max-w-md py-20 text-center shadow-sm">
+        <CardContent className="pt-6">
+          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-destructive/10">
+            <svg className="h-12 w-12 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <CardTitle className="mb-3 text-xl">
+            {language === "en" ? "Error loading tools" : "Lỗi khi tải công cụ"}
+          </CardTitle>
+          <CardDescription className="leading-relaxed">
+            {error.message || (language === "en" 
+              ? "Something went wrong. Please try again later." 
+              : "Đã xảy ra lỗi. Vui lòng thử lại sau."
+            )}
+          </CardDescription>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Only show skeleton on initial load (no cached data)
+  if (isLoading && allTools.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-center py-8">
@@ -135,7 +242,7 @@ export function ToolsList({
             <p className="text-sm font-medium text-muted-foreground">Loading amazing AI tools...</p>
           </div>
         </div>
-        <ToolCardSkeletonGrid count={INITIAL_LOAD} />
+        <ToolCardSkeletonGrid count={PAGE_SIZE} />
       </div>
     );
   }
@@ -225,6 +332,22 @@ export function ToolsList({
   if (isMobile || selectedCategory) {
     return (
       <div className="space-y-6">
+        {/* Background refetch indicator */}
+        {isBackgroundRefetch && (
+          <motion.div
+            className="flex items-center justify-center gap-2 rounded-lg bg-primary/5 px-4 py-2 text-sm text-muted-foreground"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Loader2 className="h-3 w-3 animate-spin text-primary" />
+            <span>
+              {language === "en" ? "Updating..." : "Đang cập nhật..."}
+            </span>
+          </motion.div>
+        )}
+        
         {selectedCategory && (
           <motion.div 
             className="mb-6 flex items-center gap-3"
@@ -305,9 +428,9 @@ export function ToolsList({
         {/* Infinite scroll sentinel or pagination controls */}
         {useInfiniteScrollMode ? (
           <>
-            {toolsData?.hasMore && (
+            {hasNextPage && (
               <div ref={sentinelRef} className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                {isFetchingNextPage && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
               </div>
             )}
           </>
@@ -318,19 +441,26 @@ export function ToolsList({
     );
   }
 
-  // Desktop view with categories
-  const toolsByCategory = tools.reduce((acc, tool) => {
-    if (!acc[tool.category]) {
-      acc[tool.category] = [];
-    }
-    acc[tool.category].push(tool);
-    return acc;
-  }, {} as Record<string, typeof tools>);
-
-  const categories = Object.keys(toolsByCategory).sort();
+  // Desktop view with categories (toolsByCategory and categories already calculated above)
 
   return (
     <div className="space-y-12">
+      {/* Background refetch indicator */}
+      {isBackgroundRefetch && (
+        <motion.div
+          className="flex items-center justify-center gap-2 rounded-lg bg-primary/5 px-4 py-2 text-sm text-muted-foreground"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Loader2 className="h-3 w-3 animate-spin text-primary" />
+          <span>
+            {language === "en" ? "Updating..." : "Đang cập nhật..."}
+          </span>
+        </motion.div>
+      )}
+      
       {/* Semantic search indicator */}
       {isSemanticSearch && (
         <motion.div
@@ -357,13 +487,14 @@ export function ToolsList({
           language={language}
           isSemanticSearch={isSemanticSearch}
           favouriteIdsSet={favouriteIdsSet}
+          observeCategory={observeCategory}
         />
       ))}
 
       {/* Infinite scroll sentinel for desktop */}
-      {useInfiniteScrollMode && toolsData?.hasMore && (
+      {useInfiniteScrollMode && hasNextPage && (
         <div ref={sentinelRef} className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          {isFetchingNextPage && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
         </div>
       )}
     </div>
@@ -378,6 +509,7 @@ function CategorySection({
   language,
   isSemanticSearch,
   favouriteIdsSet,
+  observeCategory,
 }: {
   category: string;
   tools: ToolWithScore[];
@@ -385,14 +517,29 @@ function CategorySection({
   language: "en" | "vi";
   isSemanticSearch: boolean;
   favouriteIdsSet: Set<Id<"aiTools">>;
+  observeCategory?: (element: Element | null, categoryIndex: number) => (() => void) | undefined;
 }) {
   const { ref, isVisible } = useScrollAnimation({
     threshold: 0.1,
     triggerOnce: true,
   });
 
+  // Set up viewport prefetch observer
+  const categoryRef = useCallback((element: HTMLDivElement | null) => {
+    // Set the ref for scroll animation
+    ref.current = element;
+    
+    // Set up viewport prefetch observer if provided
+    if (element && observeCategory) {
+      const cleanup = observeCategory(element, categoryIndex);
+      
+      // Store cleanup function to call on unmount
+      return cleanup;
+    }
+  }, [ref, observeCategory, categoryIndex]);
+
   return (
-    <div ref={ref}>
+    <div ref={categoryRef}>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -424,7 +571,7 @@ function CategorySection({
             },
           }}
         >
-          {tools.map((tool, index) => (
+          {tools.map((tool, _index) => (
             <motion.div
               key={tool._id}
               className="flex h-full min-h-0"

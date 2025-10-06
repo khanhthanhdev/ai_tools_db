@@ -1,5 +1,5 @@
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
 import { Id } from "../../convex/_generated/dataModel";
 import { ToolCard } from "./ToolCard";
 import { Skeleton } from "./ui/skeleton";
@@ -11,7 +11,7 @@ interface SimilarToolsProps {
 }
 
 export function SimilarTools({ toolId, language }: SimilarToolsProps) {
-  const similarTools = useQuery(api.aiTools.getSimilarTools, { 
+  const { data: similarTools, isLoading } = useConvexQuery(api.aiTools.getSimilarTools, { 
     toolId, 
     limit: 5 
   });
@@ -19,7 +19,7 @@ export function SimilarTools({ toolId, language }: SimilarToolsProps) {
   const t = translations[language];
 
   // Loading state
-  if (similarTools === undefined) {
+  if (isLoading || similarTools === undefined) {
     return (
       <section className="mt-12">
         <h2 className="text-2xl font-bold mb-6">

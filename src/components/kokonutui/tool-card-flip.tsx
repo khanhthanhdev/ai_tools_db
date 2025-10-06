@@ -14,8 +14,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+import { useConvexMutation } from "@/hooks/useConvexMutation";
 import { toast } from "sonner";
 
 export interface ToolCardFlipProps {
@@ -64,8 +65,8 @@ export default function ToolCardFlip({
   similarityScore,
 }: ToolCardFlipProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const user = useQuery(api.auth.loggedInUser);
-  const createReview = useMutation(api.reviews.createReview);
+  const { data: user } = useConvexQuery(api.auth.loggedInUser, {});
+  const createReview = useConvexMutation(api.reviews.createReview);
   const [userRating, setUserRating] = useState<number | null>(null);
 
   const handleRatingChange = (rating: number) => {
@@ -75,7 +76,7 @@ export default function ToolCardFlip({
     }
 
     // Don't await here, let it run in the background
-    createReview({
+    createReview.mutateAsync({
       toolId: toolId as any,
       rating,
       reviewText: undefined,

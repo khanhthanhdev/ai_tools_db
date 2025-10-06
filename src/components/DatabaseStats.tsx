@@ -1,5 +1,6 @@
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+import { queryKeys } from "@/lib/queryKeys";
 import {
   Card,
   CardContent,
@@ -72,16 +73,31 @@ const COLORS = {
 };
 
 export function DatabaseStats({ language }: DatabaseStatsProps) {
-  const stats = useQuery(api.aiTools.getToolStats);
+  const { data: stats, isLoading, isFetching } = useConvexQuery(
+    api.aiTools.getToolStats, 
+    {},
+    { queryKey: queryKeys.tools.stats() }
+  );
   const t = translations[language];
 
-  if (!stats) {
+  if (isLoading || !stats) {
     return (
       <div className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle>{t.stats}</CardTitle>
-            <CardDescription>{t.loading}</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              {t.stats}
+              {/* Background refetch indicator */}
+              {isFetching && !isLoading && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <svg className="h-3 w-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Updating...
+                </span>
+              )}
+            </CardTitle>
+            <CardDescription>{isLoading ? t.loading : t.overview}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="animate-pulse space-y-4">

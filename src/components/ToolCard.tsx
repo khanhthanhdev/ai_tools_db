@@ -19,6 +19,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ToolDetailDrawer } from "./ToolDetailDrawer";
+import { useCallback, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useConvex } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { queryKeys } from "@/lib/queryKeys";
 
 type ToolWithScore = Doc<"aiTools"> & { _score?: number };
 
@@ -68,6 +73,10 @@ const pricingVariants = {
 } as const;
 
 export function ToolCard({ tool, language, showScore = false, isFavourited }: ToolCardProps) {
+  const queryClient = useQueryClient();
+  const convex = useConvex();
+  const prefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const pricingStyle = pricingVariants[tool.pricing];
   const description = tool.description;
   const averageRating = tool.averageRating ?? 0;
@@ -79,6 +88,52 @@ export function ToolCard({ tool, language, showScore = false, isFavourited }: To
   const displayTags = tool.tags.slice(0, tagLimit);
   const remainingTags = Math.max(0, tool.tags.length - tagLimit);
   const hiddenTags = tool.tags.slice(tagLimit);
+
+  // Prefetch tool details on hover with 200ms debounce
+  const handleMouseEnter = useCallback(() => {
+    // Clear any existing timeout
+    if (prefetchTimeoutRef.current) {
+      clearTimeout(prefetchTimeoutRef.current);
+    }
+
+    // Set a new timeout for 200ms debounce
+    prefetchTimeoutRef.current = setTimeout(() => {
+      // Check if data is already cached to avoid unnecessary prefetch
+      const queryKey = queryKeys.tools.detail(tool._id);
+      const cachedData = queryClient.getQueryData(queryKey);
+      
+      if (!cachedData) {
+        // Prefetch tool details
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Prefetching tool details for: ${tool.name} (${tool._id})`);
+        }
+        queryClient.prefetchQuery({
+          queryKey,
+          queryFn: () => convex.query(api.aiTools.getToolById, { toolId: tool._id }),
+          staleTime: 5 * 60 * 1000, // 5 minutes
+        });
+      } else if (process.env.NODE_ENV === 'development') {
+        console.log(`Tool details already cached for: ${tool.name} (${tool._id})`);
+      }
+    }, 200);
+  }, [tool._id, queryClient, convex]);
+
+  const handleMouseLeave = useCallback(() => {
+    // Clear timeout if user leaves before debounce completes
+    if (prefetchTimeoutRef.current) {
+      clearTimeout(prefetchTimeoutRef.current);
+      prefetchTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (prefetchTimeoutRef.current) {
+        clearTimeout(prefetchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const smallMedia = tool.logoUrl ? (
     <div className="relative group-hover:scale-105 transition-transform duration-300">
@@ -119,6 +174,8 @@ export function ToolCard({ tool, language, showScore = false, isFavourited }: To
           "bg-gradient-to-br from-card to-card/50 backdrop-blur-sm",
           "flex flex-col"
         )}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {/* Gradient overlay on hover */}
         <div

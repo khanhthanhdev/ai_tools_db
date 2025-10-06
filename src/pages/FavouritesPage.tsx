@@ -1,4 +1,3 @@
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { ToolCard } from "../components/ToolCard";
@@ -6,6 +5,7 @@ import { Heart, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import { SEO } from "../components/SEO";
 import { generateBreadcrumbStructuredData } from "../lib/structuredData";
+import { useConvexQuery } from "../hooks/useConvexQuery";
 
 type Language = "en" | "vi";
 
@@ -17,6 +17,7 @@ const translations = {
     noFavouritesDescription: "Start exploring and favourite tools you love!",
     browseFavourites: "Browse Tools",
     loading: "Loading your favourites...",
+    refetching: "Updating...",
   },
   vi: {
     myFavourites: "Yêu thích của tôi",
@@ -25,19 +26,24 @@ const translations = {
     noFavouritesDescription: "Bắt đầu khám phá và yêu thích các công cụ bạn thích!",
     browseFavourites: "Duyệt công cụ",
     loading: "Đang tải yêu thích của bạn...",
+    refetching: "Đang cập nhật...",
   },
 };
 
 export function FavouritesPage({ language }: { language: Language }) {
   const t = translations[language];
-  const favouriteTools = useQuery(api.favourites.getUserFavourites);
+  const { data: favouriteTools, isLoading, isFetching } = useConvexQuery(
+    api.favourites.getUserFavourites,
+    {}
+  );
 
   const breadcrumbData = generateBreadcrumbStructuredData([
     { name: language === "vi" ? "Trang chủ" : "Home", url: "/" },
     { name: t.myFavourites, url: "/favourites" },
   ]);
 
-  if (favouriteTools === undefined) {
+  // Show loading state only on initial load (no cached data)
+  if (isLoading) {
     return (
       <>
         <SEO
@@ -91,11 +97,18 @@ export function FavouritesPage({ language }: { language: Language }) {
           <CardTitle className="text-2xl flex items-center gap-2">
             <Heart className="h-6 w-6 text-pink-500 fill-pink-500" />
             {t.myFavourites}
+            {/* Subtle background refetch indicator */}
+            {isFetching && !isLoading && (
+              <span className="ml-2 text-xs text-muted-foreground flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {t.refetching}
+              </span>
+            )}
           </CardTitle>
           <CardDescription>{t.manageFavourites}</CardDescription>
         </CardHeader>
         <CardContent>
-          {favouriteTools.length === 0 ? (
+          {favouriteTools && favouriteTools.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -117,7 +130,7 @@ export function FavouritesPage({ language }: { language: Language }) {
             </motion.div>
           ) : (
             <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {favouriteTools.map((tool) => (
+              {favouriteTools?.map((tool) => (
                 <ToolCard 
                   key={tool._id} 
                   tool={tool} 

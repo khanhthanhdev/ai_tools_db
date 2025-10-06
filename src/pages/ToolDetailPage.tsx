@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
 import { Id } from "../../convex/_generated/dataModel";
 import { ToolCard } from "../components/ToolCard";
 import { Skeleton } from "../components/ui/skeleton";
@@ -10,7 +10,7 @@ import { SimilarTools } from "@/components/SimilarTools";
 
 export function ToolDetailPage() {
   const { toolId } = useParams<{ toolId: Id<"aiTools"> }>();
-  const tool = useQuery(api.aiTools.getToolById, { toolId: toolId! });
+  const { data: tool } = useConvexQuery(api.aiTools.getToolById, { toolId: toolId! });
 
   return (
     <MainLayout>

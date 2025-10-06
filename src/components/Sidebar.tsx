@@ -1,9 +1,9 @@
-import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -30,7 +30,14 @@ export function Sidebar({
   variant = "desktop",
   className,
 }: SidebarProps) {
-  const categories = useQuery(api.aiTools.getCategories, { language }) || [];
+  const { data: categories = [] } = useConvexQuery(
+    api.aiTools.getCategories,
+    { language },
+    {
+      staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change frequently
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache longer
+    }
+  );
 
   const pricingOptions = [
     { value: "free", label: t.free, icon: "🆓" },

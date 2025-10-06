@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { usePaginatedQuery, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+import { useConvexInfiniteQuery } from "@/hooks/useConvexInfiniteQuery";
 import { Id } from "../../convex/_generated/dataModel";
 import { ReviewItem } from "@/components/ReviewItem";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@clerk/clerk-react";
+
 import { ReviewForm } from "@/components/ReviewForm";
 import {
   Select,
@@ -24,18 +25,37 @@ type SortByType = "recent" | "helpful";
 export function ReviewsSection({ toolId }: ReviewsSectionProps) {
   const [sortBy, setSortBy] = useState<SortByType>("recent");
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const { isSignedIn } = useAuth();
-  const userReview = useQuery(api.reviews.getUserReviewForTool, { toolId });
+  const { data: user } = useConvexQuery(api.auth.loggedInUser, {});
+  const { data: userReview } = useConvexQuery(api.reviews.getUserReviewForTool, { toolId });
 
   const {
-    results: reviews,
-    status,
-    loadMore,
-  } = usePaginatedQuery(
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useConvexInfiniteQuery(
     api.reviews.getToolReviews,
-    { toolId, sortBy },
-    { initialNumItems: 5 }
+    (pageParam) => ({
+      toolId,
+      sortBy,
+      paginationOpts: {
+        numItems: 5,
+        cursor: pageParam as string | undefined,
+      },
+    }),
+    {
+      initialPageParam: null,
+      getNextPageParam: (lastPage: any) => {
+        if (lastPage?.isDone || !lastPage?.nextCursor) {
+          return undefined;
+        }
+        return lastPage.nextCursor;
+      },
+    }
   );
+
+  const reviews = data?.pages.flatMap(page => page.page) ?? [];
 
   const handleReviewSubmitted = () => {
     setShowReviewForm(false);
@@ -56,7 +76,7 @@ export function ReviewsSection({ toolId }: ReviewsSectionProps) {
         </Select>
       </div>
 
-      {isSignedIn && (
+      {user && (
         <div className="mt-4">
           {showReviewForm ? (
             <ReviewForm
@@ -72,7 +92,7 @@ export function ReviewsSection({ toolId }: ReviewsSectionProps) {
         </div>
       )}
 
-      {status === "loading" && (
+      {isLoading && (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-24 w-full" />
@@ -80,7 +100,7 @@ export function ReviewsSection({ toolId }: ReviewsSectionProps) {
         </div>
       )}
 
-      {status !== "loading" && reviews.length === 0 && (
+      {!isLoading && reviews.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <p>No reviews yet. Be the first to write one!</p>
         </div>
@@ -92,9 +112,14 @@ export function ReviewsSection({ toolId }: ReviewsSectionProps) {
         ))}
       </div>
 
-      {status === "CanLoadMore" && (
+      {hasNextPage && (
         <div className="text-center">
-          <Button onClick={() => loadMore(5)}>Load More</Button>
+          <Button 
+            onClick={() => fetchNextPage()} 
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "Loading..." : "Load More"}
+          </Button>
         </div>
       )}
     </div>

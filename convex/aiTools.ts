@@ -128,6 +128,89 @@ export const searchTools = query({
   },
 });
 
+/**
+ * Paginated version of listTools for better performance
+ * Uses cursor-based pagination to efficiently load large datasets
+ */
+export const listToolsPaginated = query({
+  args: {
+    language: v.optional(v.union(v.literal("en"), v.literal("vi"))),
+    category: v.optional(v.string()),
+    pricing: v.optional(v.union(v.literal("free"), v.literal("freemium"), v.literal("paid"))),
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db.query("aiTools").filter((q) => q.eq(q.field("isApproved"), true));
+
+    if (args.language) {
+      query = query.filter((q) => q.eq(q.field("language"), args.language));
+    }
+    if (args.category) {
+      query = query.filter((q) => q.eq(q.field("category"), args.category));
+    }
+    if (args.pricing) {
+      query = query.filter((q) => q.eq(q.field("pricing"), args.pricing));
+    }
+
+    // Use cursor-based pagination for better performance
+    const result = await query.order("desc").paginate(args.paginationOpts);
+    
+    return {
+      page: result.page,
+      nextCursor: result.continueCursor,
+      isDone: result.isDone,
+    };
+  },
+});
+
+/**
+ * Paginated version of searchTools for better performance
+ * Uses cursor-based pagination to efficiently load search results
+ */
+export const searchToolsPaginated = query({
+  args: {
+    searchTerm: v.string(),
+    language: v.optional(v.union(v.literal("en"), v.literal("vi"))),
+    category: v.optional(v.string()),
+    pricing: v.optional(v.union(v.literal("free"), v.literal("freemium"), v.literal("paid"))),
+    paginationOpts: v.object({
+      numItems: v.number(),
+      cursor: v.union(v.string(), v.null()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const searchQuery = ctx.db
+      .query("aiTools")
+      .withSearchIndex("search_tools", (q) => {
+        let query = q.search("name", args.searchTerm).eq("isApproved", true);
+
+        if (args.language) {
+          query = query.eq("language", args.language);
+        }
+        if (args.category) {
+          query = query.eq("category", args.category);
+        }
+        if (args.pricing) {
+          query = query.eq("pricing", args.pricing);
+        }
+
+        return query;
+      });
+
+    // Use cursor-based pagination for search results
+    const result = await searchQuery.paginate(args.paginationOpts);
+    
+    return {
+      page: result.page,
+      nextCursor: result.continueCursor,
+      isDone: result.isDone,
+    };
+  },
+});
+
 export const checkDuplicate = query({
   args: {
     url: v.optional(v.string()),

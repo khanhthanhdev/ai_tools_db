@@ -5,9 +5,10 @@ import { LanguageToggle } from "./LanguageToggle";
 import { Button } from "./ui/button";
 import { Sparkles } from "lucide-react";
 import BeamsBackground from "./kokonutui/beams-background";
-import { Authenticated, Unauthenticated, useMutation } from "convex/react";
+import { Authenticated, Unauthenticated } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexMutation } from "@/hooks/useConvexMutation";
 import { toast } from "sonner";
 import { translations } from "../translations";
 import { SignInDialog } from "./SignInDialog";
@@ -21,13 +22,13 @@ interface MainLayoutProps {
 
 export function MainLayout({ children, initialLanguage = "en" }: MainLayoutProps) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
-  const seedData = useMutation(api.sampleData.seedSampleData);
+  const seedData = useConvexMutation(api.sampleData.seedSampleData);
   const { signOut } = useAuthActions();
   const t = (key: keyof (typeof translations)["en"]) => (translations[language] as typeof translations["en"])[key] || translations["en"][key];
 
   const handleSeedData = async () => {
     try {
-      const result = await seedData();
+      const result = await seedData.mutateAsync({});
       if (result === "Sample data already exists") {
         toast.info(t("dataExists"));
       } else {

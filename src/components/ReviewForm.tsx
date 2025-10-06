@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexMutation } from "@/hooks/useConvexMutation";
 import { Id, Doc } from "../../convex/_generated/dataModel";
 import { StarRating } from "./ui/star-rating";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
-import { useAuth } from "@clerk/clerk-react";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
@@ -15,14 +15,18 @@ interface ReviewFormProps {
   onReviewSubmitted: () => void;
 }
 
-export function ReviewForm({ toolId, existingReview, onReviewSubmitted }: ReviewFormProps) {
-  const { userId } = useAuth();
+export function ReviewForm({
+  toolId,
+  existingReview,
+  onReviewSubmitted,
+}: ReviewFormProps) {
+  const { data: user } = useConvexQuery(api.auth.loggedInUser, {});
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const createReview = useMutation(api.reviews.createReview);
-  const updateReview = useMutation(api.reviews.updateReview);
+  const createReview = useConvexMutation(api.reviews.createReview);
+  const updateReview = useConvexMutation(api.reviews.updateReview);
 
   useEffect(() => {
     if (existingReview) {
@@ -33,7 +37,7 @@ export function ReviewForm({ toolId, existingReview, onReviewSubmitted }: Review
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) {
+    if (!user) {
       toast.error("You must be logged in to submit a review.");
       return;
     }
@@ -45,14 +49,14 @@ export function ReviewForm({ toolId, existingReview, onReviewSubmitted }: Review
     setIsSubmitting(true);
     try {
       if (existingReview) {
-        await updateReview({
+        await updateReview.mutateAsync({
           reviewId: existingReview._id,
           rating,
           reviewText,
         });
         toast.success("Review updated successfully!");
       } else {
-        await createReview({
+        await createReview.mutateAsync({
           toolId,
           rating,
           reviewText,
@@ -70,12 +74,16 @@ export function ReviewForm({ toolId, existingReview, onReviewSubmitted }: Review
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{existingReview ? "Edit Your Review" : "Write a Review"}</CardTitle>
+        <CardTitle>
+          {existingReview ? "Edit Your Review" : "Write a Review"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Your Rating</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Your Rating
+            </label>
             <StarRating
               rating={rating}
               onRatingChange={setRating}
@@ -84,7 +92,10 @@ export function ReviewForm({ toolId, existingReview, onReviewSubmitted }: Review
             />
           </div>
           <div>
-            <label htmlFor="reviewText" className="block text-sm font-medium text-muted-foreground mb-2">
+            <label
+              htmlFor="reviewText"
+              className="block text-sm font-medium text-muted-foreground mb-2"
+            >
               Your Review (Optional)
             </label>
             <Textarea
@@ -100,7 +111,11 @@ export function ReviewForm({ toolId, existingReview, onReviewSubmitted }: Review
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : (existingReview ? "Update Review" : "Submit Review")}
+              {isSubmitting
+                ? "Submitting..."
+                : existingReview
+                  ? "Update Review"
+                  : "Submit Review"}
             </Button>
           </div>
         </form>

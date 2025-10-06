@@ -1,6 +1,8 @@
 import { useState, useMemo } from "react";
-import { useAction, useQuery } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
+import { queryKeys } from "@/lib/queryKeys";
 import { Doc } from "../../convex/_generated/dataModel";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -98,7 +100,11 @@ export function SemanticSearchBar({
   const hybridSearch = useAction(api.actions.hybridSearch);
 
   // Batch fetch all favourite IDs once
-  const favouriteIds = useQuery(api.favourites.getUserFavouriteIds);
+  const { data: favouriteIds } = useConvexQuery(
+    api.favourites.getUserFavouriteIds, 
+    {},
+    { queryKey: queryKeys.favourites.ids() }
+  );
   const favouriteIdsSet = useMemo(
     () => new Set(favouriteIds || []),
     [favouriteIds]

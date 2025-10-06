@@ -1,7 +1,11 @@
 import { Heart } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
+import { useConvexMutation } from "@/hooks/useConvexMutation";
+import { queryKeys } from "@/lib/queryKeys";
+import { updateCache, rollbackCache, cacheUtils } from "@/lib/cacheInvalidation";
 
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -13,14 +17,85 @@ interface FavouriteButtonProps {
 }
 
 export function FavouriteButton({ toolId, className, isFavourited: isFavouritedProp }: FavouriteButtonProps) {
-  const user = useQuery(api.auth.loggedInUser);
+  const { data: user } = useConvexQuery(api.auth.loggedInUser, {});
+  const queryClient = useQueryClient();
+  
   // Only query if not provided as prop (for backwards compatibility)
-  const isFavouritedQuery = useQuery(
+  const { data: isFavouritedQuery } = useConvexQuery(
     api.favourites.isFavourited, 
     isFavouritedProp === undefined ? { toolId } : "skip"
   );
   const isFavourited = isFavouritedProp ?? isFavouritedQuery;
-  const toggleFavourite = useMutation(api.favourites.toggleFavourite);
+  
+  // Use TanStack Query mutation with optimistic updates
+  const toggleFavourite = useConvexMutation(api.favourites.toggleFavourite, {
+    // Optimistic update: immediately update UI before mutation completes
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches to avoid overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: queryKeys.favourites.ids() });
+      await queryClient.cancelQueries({ queryKey: queryKeys.favourites.isFavourited(variables.toolId) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.favourites.list() });
+      
+      // Snapshot the previous state for rollback
+      const previousFavouriteIds = cacheUtils.getCacheState<Id<"aiTools">[]>(
+        queryClient,
+        queryKeys.favourites.ids()
+      );
+      const previousIsFavourited = cacheUtils.getCacheState<boolean>(
+        queryClient,
+        queryKeys.favourites.isFavourited(variables.toolId)
+      );
+      const previousFavouritesList = cacheUtils.getCacheState<any[]>(
+        queryClient,
+        queryKeys.favourites.list()
+      );
+      
+      // Determine new state (toggle current state)
+      const currentIsFavourited = isFavourited ?? false;
+      const newIsFavourited = !currentIsFavourited;
+      
+      // Optimistically update cache
+      updateCache.toggleFavourite(queryClient, variables.toolId, newIsFavourited);
+      
+      // Return context for rollback
+      return {
+        previousState: {
+          favouriteIds: previousFavouriteIds || [],
+          isFavourited: previousIsFavourited ?? false,
+          favouritesList: previousFavouritesList,
+        },
+      };
+    },
+    
+    // Rollback on error
+    onError: (error, variables, context) => {
+      if (context?.previousState) {
+        rollbackCache.favouriteToggle(
+          queryClient,
+          variables.toolId,
+          context.previousState
+        );
+      }
+      toast.error("Failed to update favourites.");
+    },
+    
+    // Show success message and ensure cache is consistent
+    onSuccess: (result, variables) => {
+      if (result) {
+        toast.success("Tool added to favourites.");
+      } else {
+        toast.info("Tool removed from favourites.");
+      }
+    },
+    
+    // Always refetch to ensure consistency with server state
+    onSettled: (_data, _error, variables) => {
+      // Invalidate queries to refetch and ensure consistency
+      queryClient.invalidateQueries({ queryKey: queryKeys.favourites.ids() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.favourites.isFavourited(variables.toolId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.favourites.list() });
+    },
+  });
 
   const handleFavouriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,16 +106,8 @@ export function FavouriteButton({ toolId, className, isFavourited: isFavouritedP
       return;
     }
 
-    try {
-      const result = await toggleFavourite({ toolId });
-      if (result) {
-        toast.success("Tool added to favourites.");
-      } else {
-        toast.info("Tool removed from favourites.");
-      }
-    } catch {
-      toast.error("Failed to update favourites.");
-    }
+    // Trigger mutation with optimistic update
+    toggleFavourite.mutate({ toolId });
   };
 
   return (

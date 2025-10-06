@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useConvexQuery } from "@/hooks/useConvexQuery";
 import { toast } from "sonner";
+import { useAddTool } from "../hooks/useToolMutations";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -113,9 +114,11 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
     };
   }, [trimmedName, trimmedUrl]);
   
-  const addTool = useMutation(api.aiTools.addTool);
-  const checkDuplicate = useQuery(api.aiTools.checkDuplicate, duplicateArgs);
-  const isCheckingDuplicate = duplicateArgs !== "skip" && checkDuplicate === undefined;
+  // Use TanStack Query mutation with cache invalidation
+  const addToolMutation = useAddTool();
+  
+  const { data: checkDuplicate, isLoading: isCheckingDuplicateQuery } = useConvexQuery(api.aiTools.checkDuplicate, duplicateArgs);
+  const isCheckingDuplicate = duplicateArgs !== "skip" && (isCheckingDuplicateQuery || checkDuplicate === undefined);
   
   // Separate checking states for better UX
   const isTypingName = formData.name.trim() !== debouncedName;
@@ -251,7 +254,7 @@ export function AddToolForm({ language, onClose }: AddToolFormProps) {
     const savingToast = toast.loading(t.saving);
     
     try {
-      const result = await addTool({
+      const result = await addToolMutation.mutateAsync({
         ...formData,
         name: formData.name.trim(),
         description: formData.description.trim(),
