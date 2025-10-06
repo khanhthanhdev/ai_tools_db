@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { ToolsList } from "../components/ToolsList";
 import { SearchBar } from "../components/SearchBar";
-import { SemanticSearchBar } from "../components/SemanticSearchBar";
 import { CategoryFilterMobile } from "../components/CategoryFilterMobile";
 import { Sidebar } from "../components/Sidebar";
+
+// Lazy load semantic search since it's not always visible
+const SemanticSearchBar = lazy(() => 
+  import("../components/SemanticSearchBar").then(module => ({
+    default: module.SemanticSearchBar
+  }))
+);
 import { Button } from "../components/ui/button";
+// Import motion - will be code-split via Vite config
 import { motion, AnimatePresence } from "framer-motion";
+
+// Reduce motion for users who prefer reduced motion
+const shouldReduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 import { Sparkles, Zap, Star, Rocket, Brain, Code, Palette, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SEO } from "../components/SEO";
@@ -378,11 +388,13 @@ export function BrowsePage({ language }: { language: Language }) {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <SemanticSearchBar
-                language={language}
-                category={selectedCategory}
-                pricing={selectedPricing as "free" | "freemium" | "paid" | undefined}
-              />
+              <Suspense fallback={<div className="h-12 bg-muted animate-pulse rounded-md" />}>
+                <SemanticSearchBar
+                  language={language}
+                  category={selectedCategory}
+                  pricing={selectedPricing as "free" | "freemium" | "paid" | undefined}
+                />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>

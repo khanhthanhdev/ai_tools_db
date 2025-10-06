@@ -10,6 +10,8 @@
     "build": "vite build",
     "prebuild": "npm run generate:sitemap",
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
+    "analyze": "node scripts/analyze-bundle.mjs",
+    "build:analyze": "npm run build && npm run analyze",
     "lint": "tsc -p convex -noEmit --pretty false && tsc -p . -noEmit --pretty false && convex dev --once && vite build"
   },
   "dependencies": {

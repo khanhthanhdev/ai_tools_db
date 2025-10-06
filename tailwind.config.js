@@ -3,6 +3,18 @@ const { fontFamily } = require("tailwindcss/defaultTheme");
 module.exports = {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
+  // Optimize CSS output
+  corePlugins: {
+    // Disable unused core plugins to reduce CSS size
+    preflight: true, // Keep this for base styles
+    container: true,
+    accessibility: false, // Disable if not using accessibility utilities
+    backgroundOpacity: false, // Disable if not using background opacity
+    borderOpacity: false, // Disable if not using border opacity
+    divideOpacity: false, // Disable if not using divide opacity
+    placeholderOpacity: false, // Disable if not using placeholder opacity
+    textOpacity: false, // Disable if not using text opacity
+  },
   theme: {
     container: {
       center: true,

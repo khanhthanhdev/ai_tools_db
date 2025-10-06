@@ -1,6 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { criticalCssPlugin } from "./vite-plugin-critical-css";
+import { preloadHintsPlugin } from "./vite-plugin-preload-hints";
+import { cssPurgePlugin } from "./vite-plugin-css-purge";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -42,6 +45,15 @@ window.addEventListener('message', async (message) => {
       }
       : null,
     // End of code for taking screenshots on chef.convex.dev.
+    
+    // Add critical CSS plugin for production builds
+    mode === "production" ? criticalCssPlugin() : null,
+    
+    // Add preload hints for critical resources
+    mode === "production" ? preloadHintsPlugin() : null,
+    
+    // Add CSS purging for smaller CSS bundles
+    mode === "production" ? cssPurgePlugin() : null,
   ].filter(Boolean),
 
   // Optimize dependency pre-bundling
@@ -120,7 +132,7 @@ window.addEventListener('message', async (message) => {
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
 
-    // Enable CSS code splitting
+    // Enable CSS code splitting but keep critical CSS inline
     cssCodeSplit: true,
 
     // Optimize source maps for production
@@ -128,6 +140,12 @@ window.addEventListener('message', async (message) => {
 
     // Minification options
     minify: "esbuild",
+    
+    // Optimize for faster loading
+    reportCompressedSize: false,
+    
+    // Reduce initial bundle size
+    assetsInlineLimit: 2048, // Inline smaller assets
 
     rollupOptions: {
       // Optimize tree-shaking
@@ -142,25 +160,46 @@ window.addEventListener('message', async (message) => {
         entryFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
 
-        // Conservative manual chunks - only split truly independent large libraries
+        // Optimized manual chunks for better loading performance
         manualChunks(id) {
           if (!id.includes("node_modules")) {
             return undefined;
           }
 
-          // Only split large, independent libraries that don't have circular deps
+          // Core React ecosystem - keep together for better caching
+          if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/react-router/")) {
+            return "react-vendor";
+          }
+
+          // Convex and auth - frequently used together
+          if (id.includes("/convex/") || id.includes("/@convex-dev/")) {
+            return "convex";
+          }
+
+          // UI libraries - used across many components
+          if (id.includes("/@radix-ui/") || id.includes("/lucide-react/")) {
+            return "ui-vendor";
+          }
+
           // Charts library (large and usually lazy loaded)
           if (id.includes("/recharts/") || id.includes("/d3-")) {
             return "charts";
           }
 
-          // Motion library (large animation library)
+          // Motion library (large animation library) - defer loading
           if (id.includes("/motion/") || id.includes("/framer-motion/")) {
             return "motion";
           }
 
-          // Let Vite automatically handle the rest to avoid circular dependency issues
-          // This includes React, Radix UI, and other interdependent libraries
+          // Form libraries
+          if (id.includes("/react-hook-form/") || id.includes("/zod/") || id.includes("/@hookform/")) {
+            return "forms";
+          }
+
+          // Other utilities
+          if (id.includes("/date-fns/") || id.includes("/clsx/") || id.includes("/tailwind-merge/")) {
+            return "utils";
+          }
         },
       },
     },
