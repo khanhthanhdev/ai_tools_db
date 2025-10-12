@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This feature aims to optimize data fetching performance in the AI Tools Database by integrating TanStack Query with Convex. Currently, while Convex prepares data in <200ms, there's a 1-2 second delay before data reaches the client. TanStack Query will provide advanced caching, prefetching, and optimistic updates to dramatically improve perceived performance and user experience.
+This feature aims to optimize data fetching performance in the AI Knowledge Cloud by integrating TanStack Query with Convex. Currently, while Convex prepares data in <200ms, there's a 1-2 second delay before data reaches the client. TanStack Query will provide advanced caching, prefetching, and optimistic updates to dramatically improve perceived performance and user experience.
 
 ## Requirements
 

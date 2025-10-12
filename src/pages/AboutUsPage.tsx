@@ -292,8 +292,8 @@ export function AboutUsPage({ language = "en" }: AboutUsPageProps) {
         }
         description={
           language === "vi"
-            ? "Tìm hiểu về Trần Khánh Thành (khanhthanhdev), người sáng lập AI Tools Database. Đám mây tri thức AI được tuyển chọn cho Thư viện Vin Uni."
-            : "Learn about Tran Khanh Thanh (khanhthanhdev), founder of AI Tools Database. AI Knowledge Cloud curated for Vin Uni Library."
+            ? "Tìm hiểu về Trần Khánh Thành (khanhthanhdev), người sáng lập AI Knowledge Cloud. Đám mây tri thức AI được tuyển chọn cho Thư viện Vin Uni."
+            : "Learn about Tran Khanh Thanh (khanhthanhdev), founder of AI Knowledge Cloud. AI Knowledge Cloud curated for Vin Uni Library."
         }
         keywords={
           language === "vi"

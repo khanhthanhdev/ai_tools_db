@@ -20,7 +20,7 @@ type Language = "en" | "vi";
 
 const translations = {
   en: {
-    title: "AI Tools Database",
+    title: "AI Knowledge Cloud",
     addTool: "Add Tool",
     browse: "Browse",
     favourites: "Favourites",
@@ -85,11 +85,9 @@ export function Layout({
         <div className="container flex h-12 sm:h-16 items-center justify-between px-3 sm:px-6 gap-4">
           {/* Logo and Title */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-              <svg className="h-4 w-4 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
+
+              <img src="image.jpg" alt="Logo" className="h-4 w-4 sm:h-6 sm:w-6" />
+
             <h1 className="text-base sm:text-xl font-bold truncate hidden sm:block">{t.title}</h1>
           </Link>
 

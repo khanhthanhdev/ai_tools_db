@@ -1,7 +1,7 @@
 export const translations = {
   en: {
-    title: "AI Tools Database",
-    subtitle: "Discover and share the best AI tools",
+    title: "AI Knowledge Cloud",
+    subtitle: "Discover and share the best AI tools, By AI for AI",
     search: "Search AI tools...",
     addTool: "Add Tool",
     browse: "Browse",

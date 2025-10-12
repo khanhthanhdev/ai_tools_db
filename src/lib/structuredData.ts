@@ -6,7 +6,7 @@ export function generateWebsiteStructuredData(language: "en" | "vi") {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: language === "vi" ? "Cơ Sở Dữ Liệu Công Cụ AI" : "AI Tools Database",
+    name: language === "vi" ? "Cơ Sở Dữ Liệu Công Cụ AI" : "AI Knowledge Cloud",
     alternateName: "AI Knowledge Cloud",
     description: language === "vi" 
       ? "Đám mây tri thức AI để khám phá và đề xuất các công cụ AI tốt nhất. Được tuyển chọn cho Thư viện Vin Uni."
@@ -100,7 +100,7 @@ export function generateOrganizationStructuredData() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "AI Tools Database",
+    name: "AI Knowledge Cloud",
     alternateName: "AI Knowledge Cloud",
     url: baseUrl,
     logo: `${baseUrl}/og-preview.png`,

@@ -26,7 +26,7 @@
 ```
 
 ### Page Titles
-- Homepage: "AI Tools Database - AI Knowledge Cloud & Tool Recommendation"
+- Homepage: "AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation"
 - About: "About Us - Tran Khanh Thanh"
 - All pages include your branding
 
@@ -104,7 +104,7 @@ After deployment, search for:
 
 When shared, people will see:
 ```
-AI Tools Database - AI Knowledge Cloud & Tool Recommendation
+AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation
 
 AI Knowledge Cloud for discovering and recommending 
 the best AI tools. Curated by Tran Khanh Thanh 

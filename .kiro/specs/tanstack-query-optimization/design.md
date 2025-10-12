@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design integrates TanStack Query (React Query) with Convex to optimize data fetching performance in the AI Tools Database. The integration leverages TanStack Query's caching, prefetching, and optimistic update capabilities while maintaining Convex's reactive real-time features.
+This design integrates TanStack Query (React Query) with Convex to optimize data fetching performance in the AI Knowledge Cloud. The integration leverages TanStack Query's caching, prefetching, and optimistic update capabilities while maintaining Convex's reactive real-time features.
 
 ### Key Performance Goals
 - Reduce time-to-first-data from 1-2s to <300ms

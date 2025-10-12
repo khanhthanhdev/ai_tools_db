@@ -1,6 +1,6 @@
 # Product Overview
 
-AI Tools Database - A bilingual (English/Vietnamese) web application for discovering, reviewing, and managing AI tools.
+AI Knowledge Cloud - A bilingual (English/Vietnamese) web application for discovering, reviewing, and managing AI tools.
 
 ## Core Features
 - Browse and search AI tools with filtering by category, pricing, and language

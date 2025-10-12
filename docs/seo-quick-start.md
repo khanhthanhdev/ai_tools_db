@@ -2,7 +2,7 @@
 
 ## What Was Implemented
 
-Your AI Tools Database now has comprehensive SEO optimizations for better crawlability by search engines and LLMs (like ChatGPT, Claude, Perplexity, etc.).
+Your AI Knowledge Cloud now has comprehensive SEO optimizations for better crawlability by search engines and LLMs (like ChatGPT, Claude, Perplexity, etc.).
 
 ## Immediate Actions Required
 

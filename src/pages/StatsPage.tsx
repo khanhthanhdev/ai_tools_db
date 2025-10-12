@@ -29,7 +29,7 @@ export function StatsPage({ language }: { language: Language }) {
         title={language === "vi" ? "Thống Kê Công Cụ AI" : "AI Tools Statistics"}
         description={language === "vi" 
           ? "Xem thống kê và thông tin chi tiết về cơ sở dữ liệu công cụ AI. Khám phá xu hướng, danh mục phổ biến và nhiều hơn nữa."
-          : "View statistics and insights about our AI tools database. Discover trends, popular categories, and more."}
+          : "View statistics and insights about our AI Knowledge Cloud. Discover trends, popular categories, and more."}
         keywords={language === "vi"
           ? ["thống kê AI", "phân tích công cụ AI", "xu hướng AI", "dữ liệu AI"]
           : ["AI statistics", "AI tools analytics", "AI trends", "AI data"]}

@@ -26,8 +26,8 @@ type SearchMode = "keyword" | "semantic";
 
 const translations = {
   en: {
-    title: "AI Tools Database",
-    subtitle: "Discover and share the best AI tools",
+    title: "AI Knowledge Cloud",
+    subtitle: "Discover and share the best AI tools, By AI for AI",
     search: "Search AI tools...",
     categories: "Categories",
     pricing: "Pricing",
@@ -70,7 +70,7 @@ export function BrowsePage({ language }: { language: Language }) {
   return (
     <>
       <SEO
-        title={language === "vi" ? "Cơ Sở Dữ Liệu Công Cụ AI - Đám Mây Tri Thức AI" : "AI Tools Database - AI Knowledge Cloud & Tool Recommendation"}
+        title={language === "vi" ? "Cơ Sở Dữ Liệu Công Cụ AI - Đám Mây Tri Thức AI" : "AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation"}
         description={language === "vi" 
           ? "Đám mây tri thức AI để khám phá và đề xuất các công cụ AI tốt nhất. Được tuyển chọn bởi Trần Khánh Thành (khanhthanhdev) cho Thư viện Vin Uni và cộng đồng AI."
           : "AI Knowledge Cloud for discovering and recommending the best AI tools. Curated by Tran Khanh Thanh (khanhthanhdev) for Vin Uni Library and the AI community."}

@@ -2,7 +2,7 @@
 
 ## What Was Updated
 
-Your AI Tools Database has been updated with your specific keywords and author information throughout the entire application.
+Your AI Knowledge Cloud has been updated with your specific keywords and author information throughout the entire application.
 
 ## 🎯 Keywords Added
 
@@ -20,7 +20,7 @@ Your AI Tools Database has been updated with your specific keywords and author i
 
 ### 1. SEO Component (`src/components/SEO.tsx`)
 **Changes:**
-- Updated default title: "AI Tools Database - AI Knowledge Cloud & Tool Recommendation"
+- Updated default title: "AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation"
 - Updated default description to include "AI Knowledge Cloud" and "Vin Uni Library"
 - Added keywords: AI knowledge cloud, AI tool recommendation, Vin Uni Library, khanhthanhdev, Tran Khanh Thanh
 - Added author meta tag: "Tran Khanh Thanh (khanhthanhdev)"
@@ -48,7 +48,7 @@ Your AI Tools Database has been updated with your specific keywords and author i
 
 ### 3. Homepage (`index.html`)
 **Changes:**
-- Title: "AI Tools Database - AI Knowledge Cloud & Tool Recommendation"
+- Title: "AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation"
 - Description: Mentions AI Knowledge Cloud, Vin Uni Library, and Tran Khanh Thanh
 - Keywords: All your specified keywords included
 - Author meta tag: "Tran Khanh Thanh (khanhthanhdev)"
@@ -58,7 +58,7 @@ Your AI Tools Database has been updated with your specific keywords and author i
 
 ### 4. Browse Page (`src/pages/BrowsePage.tsx`)
 **Changes:**
-- Title: "AI Tools Database - AI Knowledge Cloud & Tool Recommendation"
+- Title: "AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation"
 - Description: Full branding with your name and Vin Uni Library
 - Keywords: All your keywords in both English and Vietnamese
 - Vietnamese title: "Cơ Sở Dữ Liệu Công Cụ AI - Đám Mây Tri Thức AI"
@@ -74,14 +74,14 @@ Your AI Tools Database has been updated with your specific keywords and author i
 **Changes:**
 - Added header comment:
   ```
-  # AI Tools Database - AI Knowledge Cloud
+  # AI Knowledge Cloud - AI Knowledge Cloud
   # Curated by Tran Khanh Thanh (khanhthanhdev) for Vin Uni Library
   # Keywords: AI knowledge cloud, AI tool recommendation, Vin Uni Library
   ```
 
 ### 7. Web Manifest (`public/site.webmanifest`)
 **Changes:**
-- Name: "AI Tools Database - AI Knowledge Cloud"
+- Name: "AI Knowledge Cloud - AI Knowledge Cloud"
 - Description: Includes your name and Vin Uni Library
 - Added author field: "Tran Khanh Thanh (khanhthanhdev)"
 - Added "education" category
@@ -214,7 +214,7 @@ Your application now has:
 
 When people search for your keywords, they'll see:
 
-**Title**: AI Tools Database - AI Knowledge Cloud & Tool Recommendation
+**Title**: AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation
 
 **Description**: AI Knowledge Cloud for discovering and recommending the best AI tools. Curated by Tran Khanh Thanh (khanhthanhdev) for Vin Uni Library and the AI community.
 
@@ -224,7 +224,7 @@ When people search for your keywords, they'll see:
 
 When shared on Facebook, Twitter, LinkedIn:
 
-**Title**: AI Tools Database - AI Knowledge Cloud & Tool Recommendation
+**Title**: AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation
 
 **Description**: AI Knowledge Cloud for discovering and recommending the best AI tools. Curated by Tran Khanh Thanh for Vin Uni Library.
 

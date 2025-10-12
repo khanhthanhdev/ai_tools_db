@@ -1,7 +1,7 @@
 # SEO Implementation Guide
 
 ## Overview
-This document outlines the SEO optimizations implemented for the AI Tools Database application to improve crawlability for search engines and LLMs.
+This document outlines the SEO optimizations implemented for the AI Knowledge Cloud application to improve crawlability for search engines and LLMs.
 
 ## Implemented Features
 
@@ -263,7 +263,7 @@ Replace `https://aiknowledgecloud.vercel.app` in:
 Add to `.env.local`:
 ```
 VITE_SITE_URL=https://aiknowledgecloud.vercel.app
-VITE_SITE_NAME=AI Tools Database
+VITE_SITE_NAME=AI Knowledge Cloud
 ```
 
 ## Next Steps

@@ -12,7 +12,7 @@ interface SEOProps {
 }
 
 export function SEO({
-  title = "AI Tools Database - AI Knowledge Cloud & Tool Recommendation",
+  title = "AI Knowledge Cloud - AI Knowledge Cloud & Tool Recommendation",
   description = "AI Knowledge Cloud for discovering and recommending the best AI tools. Curated by Tran Khanh Thanh (khanhthanhdev) for Vin Uni Library and the AI community.",
   keywords = ["AI knowledge cloud", "AI tool recommendation", "Vin Uni Library", "AI tools", "artificial intelligence", "AI database", "khanhthanhdev", "Tran Khanh Thanh"],
   image = "/og-preview.png",
@@ -21,12 +21,12 @@ export function SEO({
   language = "en",
   structuredData,
 }: SEOProps) {
-  const siteName = "AI Tools Database";
+  const siteName = "AI Knowledge Cloud";
   const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
   
   const translations = {
     en: {
-      siteName: "AI Tools Database",
+      siteName: "AI Knowledge Cloud",
       defaultDescription: "AI Knowledge Cloud for discovering and recommending the best AI tools. Curated by Tran Khanh Thanh (khanhthanhdev) for Vin Uni Library and the AI community.",
     },
     vi: {

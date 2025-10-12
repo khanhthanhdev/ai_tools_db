@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the technical design for implementing semantic search in the AI Tools Database using Google Gemini's gemini-embedding-001 model and Convex's vector search capabilities. The design focuses on providing users with natural language search while maintaining performance, cost-efficiency, and reliability.
+This document outlines the technical design for implementing semantic search in the AI Knowledge Cloud using Google Gemini's gemini-embedding-001 model and Convex's vector search capabilities. The design focuses on providing users with natural language search while maintaining performance, cost-efficiency, and reliability.
 
 The system will migrate from OpenAI embeddings (1536 dimensions) to Google Gemini embeddings (768 dimensions) to take advantage of the free tier (1,500 requests/day) and lower costs. The implementation will be backward-compatible and include automatic embedding generation, caching, and fallback mechanisms.
 

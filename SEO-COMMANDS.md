@@ -203,7 +203,7 @@ npx lighthouse https://your-domain.com --view
 # .env.local (create if doesn't exist)
 VITE_CONVEX_URL=https://your-convex-deployment.convex.cloud
 VITE_SITE_URL=https://your-domain.com
-VITE_SITE_NAME=AI Tools Database
+VITE_SITE_NAME=AI Knowledge Cloud
 ```
 
 ## Git Commands (if needed)

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This feature will implement semantic search functionality for the AI Tools Database, allowing users to search for tools using natural language descriptions instead of just keyword matching. The implementation will use Google Gemini's gemini-embedding-001 model for generating vector embeddings and Convex's vector search capabilities for finding relevant tools. This will significantly improve the user experience by understanding the intent behind search queries like "I need something to help me write blog posts faster" rather than requiring exact keyword matches.
+This feature will implement semantic search functionality for the AI Knowledge Cloud, allowing users to search for tools using natural language descriptions instead of just keyword matching. The implementation will use Google Gemini's gemini-embedding-001 model for generating vector embeddings and Convex's vector search capabilities for finding relevant tools. This will significantly improve the user experience by understanding the intent behind search queries like "I need something to help me write blog posts faster" rather than requiring exact keyword matches.
 
 ## Requirements
 
